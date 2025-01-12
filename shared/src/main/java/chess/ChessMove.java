@@ -16,7 +16,7 @@ public class ChessMove {
      * @return ChessPosition of starting location
      */
     public ChessPosition getStartPosition() {
-        throw new RuntimeException("Not implemented");
+        return new ChessPosition(0, 0);
     }
 
     /**
@@ -25,7 +25,6 @@ public class ChessMove {
     public ChessPosition getEndPosition() {
         throw new RuntimeException("Not implemented");
     }
-
     /**
      * Gets the type of piece to promote a pawn to if pawn promotion is part of this
      * chess move
@@ -34,5 +33,16 @@ public class ChessMove {
      */
     public ChessPiece.PieceType getPromotionPiece() {
         throw new RuntimeException("Not implemented");
+    }
+
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+        ChessMove move = (ChessMove) obj;
+        return this.getStartPosition() == move.getStartPosition() && this.getEndPosition() == move.getEndPosition();
     }
 }
