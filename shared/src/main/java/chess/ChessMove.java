@@ -34,15 +34,4 @@ public class ChessMove {
     public ChessPiece.PieceType getPromotionPiece() {
         throw new RuntimeException("Not implemented");
     }
-
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null || getClass() != obj.getClass()) {
-            return false;
-        }
-        ChessMove move = (ChessMove) obj;
-        return this.getStartPosition() == move.getStartPosition() && this.getEndPosition() == move.getEndPosition();
-    }
 }
