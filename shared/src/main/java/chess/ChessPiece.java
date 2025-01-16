@@ -62,6 +62,15 @@ public class ChessPiece {
         switch (pieceType) {
             case BISHOP:
                 moves.addAll(BishopMoves.legalMoves(board, myPosition));
+                break;
+            case ROOK:
+                moves.addAll(RookMoves.legalMoves(board, myPosition));
+                break;
+            case QUEEN:
+                moves.addAll(QueenMoves.legalMoves(board, myPosition));
+                break;
+            case KING:
+                moves.add(KingMoves.legalMoves(board, myPosition));
         }
         return moves;
     }

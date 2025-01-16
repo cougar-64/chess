@@ -9,7 +9,6 @@ public class BishopMoves extends MoveCalculator {
 
     public static Collection<ChessMove> legalMoves(ChessBoard board, ChessPosition position) {
         ArrayList<ChessMove> legalMoves = new ArrayList<>();
-        ChessPosition oldPosition = new ChessPosition(position.getRow(), position.getColumn());
         ChessGame.TeamColor myColor = (board.getPiece(position)).getTeamColor();
 
         for (ChessPosition current = position.offset(1, -1); current.getRow() <= 8 && current.getColumn() > 0;
