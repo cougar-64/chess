@@ -70,7 +70,7 @@ public class ChessPiece {
                 moves.addAll(QueenMoves.legalMoves(board, myPosition));
                 break;
             case KING:
-                moves.add(KingMoves.legalMoves(board, myPosition));
+                moves.addAll(KingMoves.legalMoves(board, myPosition));
         }
         return moves;
     }
