@@ -3,20 +3,11 @@ import java.util.Collection;
 import java.util.ArrayList;
 
 public class MoveCalculator {
-    private ChessBoard board;
-    private ChessPosition position;
-    private ChessPiece piece;
+    protected ChessBoard board;
+    protected static ChessPosition position;
 
-    public Collection<ChessMove> MoveCalculator(ChessBoard board, ChessPosition position, ChessPiece piece) {
-        Collection<ChessMove> moves = new ArrayList<>();
+    public MoveCalculator(ChessBoard board, ChessPosition position) {
         this.board = board;
         this.position = position;
-        this.piece = piece;
-        var pieceType = piece.getPieceType();
-        switch (pieceType) {
-            case PAWN:
-                moves.addAll(PawnMoves(board, position, piece));
-                break;
-        }
     }
 }

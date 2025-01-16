@@ -52,6 +52,17 @@ public class ChessPiece {
      * @return Collection of valid moves
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-        return new ArrayList<>();
+        Collection<ChessMove> possibleMoves = CalculateMove(board, myPosition);
+        return possibleMoves;
+    }
+
+    public Collection<ChessMove> CalculateMove(ChessBoard board, ChessPosition myPosition) {
+        Collection<ChessMove> moves = new ArrayList<>();
+        ChessPiece.PieceType pieceType = getPieceType();
+        switch (pieceType) {
+            case BISHOP:
+                moves.addAll(BishopMoves.legalMoves(board, myPosition));
+        }
+        return moves;
     }
 }

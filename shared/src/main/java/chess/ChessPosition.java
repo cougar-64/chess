@@ -32,6 +32,10 @@ public class ChessPosition {
         return COL;
     }
 
+    public ChessPosition offset(int rowOffset, int colOffset) {
+        return new ChessPosition(this.ROW + rowOffset, this.COL + colOffset);
+    }
+
     public boolean equals(Object obj) {
         if (this == obj) {
             return true;
@@ -44,5 +48,13 @@ public class ChessPosition {
     }
     public int hashCode() {
         return 31* ROW + COL;
+    }
+
+    @Override
+    public String toString() {
+        return "ChessPosition{" +
+                "ROW=" + ROW +
+                ", COL=" + COL +
+                '}';
     }
 }

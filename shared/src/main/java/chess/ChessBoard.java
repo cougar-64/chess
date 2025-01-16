@@ -7,8 +7,8 @@ package chess;
  * signature of the existing methods.
  */
 public class ChessBoard {
-    private ChessPiece[][] squares = new ChessPiece[8][8];
-    private String boardState;
+    protected ChessPiece[][] squares = new ChessPiece[8][8];
+    protected String boardState;
     public ChessBoard() {
     }
 
@@ -31,6 +31,10 @@ public class ChessBoard {
      */
     public ChessPiece getPiece(ChessPosition position) {
         return squares[position.getRow()-1][position.getColumn()-1];
+    }
+
+    public ChessPiece[][] getPosition() {
+        return squares;
     }
 
     /**
