@@ -71,6 +71,8 @@ public class ChessPiece {
                 break;
             case KING:
                 moves.addAll(KingMoves.legalMoves(board, myPosition));
+            case KNIGHT:
+                moves.addAll(KnightMoves.legalMoves(board, myPosition));
         }
         return moves;
     }
