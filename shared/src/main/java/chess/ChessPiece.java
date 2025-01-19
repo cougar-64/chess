@@ -72,10 +72,13 @@ public class ChessPiece {
                 break;
             case KING:
                 moves.addAll(KingMoves.legalMoves(board, myPosition));
+                break;
             case KNIGHT:
                 moves.addAll(KnightMoves.legalMoves(board, myPosition));
+                break;
             case PAWN:
                 moves.addAll(PawnMoves.legalMoves(board, myPosition));
+                break;
         }
         return moves;
     }
