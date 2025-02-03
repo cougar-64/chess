@@ -9,10 +9,23 @@ import java.util.Objects;
  * Note: You can add to this class, but you may not alter
  * signature of the existing methods.
  */
-public class ChessBoard {
+public class ChessBoard implements Cloneable {
     protected ChessPiece[][] squares = new ChessPiece[8][8];
     protected String boardState;
     public ChessBoard() {
+    }
+
+
+    public ChessBoard createClone() {
+        ChessBoard deepCopy = new ChessBoard();
+        deepCopy.squares = new ChessPiece[8][8];
+        for (int i = 0; i < squares.length; i++) {
+            for (int j = 0; j < squares[i].length; j++) {
+                if (this.squares[i][j] != null)
+                    deepCopy.squares[i][j] = this.squares[i][j];
+            }
+        }
+        return deepCopy;
     }
 
     /**

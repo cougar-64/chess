@@ -10,7 +10,7 @@ import java.util.Objects;
  * Note: You can add to this class, but you may not alter
  * signature of the existing methods.
  */
-public class ChessPiece {
+public class ChessPiece implements Cloneable {
     private ChessGame.TeamColor pieceColor;
     private PieceType type;
 
@@ -53,13 +53,13 @@ public class ChessPiece {
      * @return Collection of valid moves
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-        Collection<ChessMove> possibleMoves = CalculateMove(board, myPosition);
+        ChessPiece.PieceType pieceType = getPieceType();
+        Collection<ChessMove> possibleMoves = CalculateMove(board, myPosition, pieceType);
         return possibleMoves;
     }
 
-    public Collection<ChessMove> CalculateMove(ChessBoard board, ChessPosition myPosition) {
+    public Collection<ChessMove> CalculateMove(ChessBoard board, ChessPosition myPosition, ChessPiece.PieceType pieceType) {
         Collection<ChessMove> moves = new ArrayList<>();
-        ChessPiece.PieceType pieceType = getPieceType();
         switch (pieceType) {
             case BISHOP:
                 moves.addAll(BishopMoves.legalMoves(board, myPosition));
