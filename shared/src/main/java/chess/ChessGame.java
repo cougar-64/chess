@@ -71,8 +71,8 @@ public class ChessGame {
             Collection<ChessMove> moves = new ArrayList<>();
             ChessPiece.PieceType type;
             ChessPosition myKing = new ChessPosition(0,0);
-            for (int row = 0; row < deepCopy.squares.length; row++) {
-                for (int col = 0; col < deepCopy.squares[row].length; col++) {
+            for (int row = 1; row < deepCopy.squares.length; row++) {
+                for (int col = 1; col < deepCopy.squares[row].length; col++) {
                     if (deepCopy.squares[row][col] != null) {
                         if (deepCopy.getPiece(new ChessPosition(row, col)).getPieceType() == ChessPiece.PieceType.KING)
                             myKing = new ChessPosition(row, col);
@@ -133,7 +133,10 @@ public class ChessGame {
             if ((piece.getTeamColor()) != myColor)
                 currentBoard.squares[end.getRow() - 1][end.getColumn() - 1] = piece;
         }
-        currentBoard.squares[end.getRow() - 1][end.getColumn() - 1] = piece;
+        if (oldPiece.getPieceType().equals(ChessPiece.PieceType.PAWN))
+            currentBoard.squares[end.getRow() - 1][end.getColumn() - 1] = new ChessPiece(teamColor, move.getPromotionPiece());
+        else
+            currentBoard.squares[end.getRow() - 1][end.getColumn() - 1] = piece;
         currentBoard.squares[start.getRow() - 1][start.getColumn() - 1] = null;
         setTeamTurn(otherColor);
     }
@@ -151,8 +154,8 @@ public class ChessGame {
         ChessPiece piece;
         ChessPiece.PieceType type;
         ChessPosition myKing = new ChessPosition(0,0);
-        for (int row = 0; row < currentBoard.squares.length; row++) {
-            for (int col = 0; col < currentBoard.squares[row].length; col++) {
+        for (int row = 1; row < currentBoard.squares.length; row++) {
+            for (int col = 1; col < currentBoard.squares[row].length; col++) {
                 if (currentBoard.squares[row][col] != null) {
                     if (currentBoard.getPiece(new ChessPosition(row, col)).getPieceType() == ChessPiece.PieceType.KING)
                         myKing = new ChessPosition(row, col);
@@ -189,8 +192,8 @@ public class ChessGame {
             ChessPiece piece;
             ChessPiece.PieceType type;
             ChessPosition myKing = new ChessPosition(0,0);
-            for (int row = 0; row < deepCopy.squares.length; row++) {
-                for (int col = 0; col < deepCopy.squares[row].length; col++) {
+            for (int row = 1; row < deepCopy.squares.length; row++) {
+                for (int col = 1; col < deepCopy.squares[row].length; col++) {
                     if (deepCopy.squares[row][col] != null) {
                         if (deepCopy.getPiece(new ChessPosition(row, col)).getPieceType() == ChessPiece.PieceType.KING)
                             myKing = new ChessPosition(row, col);
