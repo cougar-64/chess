@@ -1,5 +1,6 @@
 package chess;
 
+import java.sql.Array;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -71,10 +72,10 @@ public class ChessGame {
             Collection<ChessMove> moves = new ArrayList<>();
             ChessPiece.PieceType type;
             ChessPosition myKing = new ChessPosition(0,0);
-            for (int row = 1; row < deepCopy.squares.length; row++) {
-                for (int col = 1; col < deepCopy.squares[row].length; col++) {
-                    if (deepCopy.squares[row][col] != null) {
-                        if (deepCopy.getPiece(new ChessPosition(row, col)).getPieceType() == ChessPiece.PieceType.KING)
+            for (int row = 1; row <= 8; row++) {
+                for (int col = 1; col <=8; col++) {
+                    if (deepCopy.getPiece(new ChessPosition(row, col)) != null) {
+                        if (deepCopy.getPiece(new ChessPosition(row, col)).getPieceType() == ChessPiece.PieceType.KING && deepCopy.getPiece(new ChessPosition(row, col)).getTeamColor() == opposite)
                             myKing = new ChessPosition(row, col);
                         if (deepCopy.getPiece(new ChessPosition(row, col)).getTeamColor() == opposite) {
                             piece = deepCopy.getPiece(new ChessPosition(row, col));
@@ -95,9 +96,9 @@ public class ChessGame {
                         finalValidMoves.add(move);
                 }
             }
+            return finalValidMoves;
         }
-
-        return finalValidMoves;
+        return possibleMoves;
     }
 
     /**
@@ -118,7 +119,8 @@ public class ChessGame {
         ChessPiece oldPiece = currentBoard.getPiece(move.getStartPosition());
         if (! oldPiece.getTeamColor().equals(myColor))
             throw new InvalidMoveException();
-        Collection<ChessMove> moves = oldPiece.CalculateMove(currentBoard, move.getStartPosition(), oldPiece.getPieceType());
+//        Collection<ChessMove> moves = oldPiece.CalculateMove(currentBoard, move.getStartPosition(), oldPiece.getPieceType());
+        Collection<ChessMove> moves = validMoves(move.getStartPosition());
         for (ChessMove myMove : moves) {
             if (myMove.equals(move)) {
                 IsIn = true;
@@ -154,22 +156,22 @@ public class ChessGame {
         ChessPiece piece;
         ChessPiece.PieceType type;
         ChessPosition myKing = new ChessPosition(0,0);
-        for (int row = 1; row < currentBoard.squares.length; row++) {
-            for (int col = 1; col < currentBoard.squares[row].length; col++) {
-                if (currentBoard.squares[row][col] != null) {
-                    if (currentBoard.getPiece(new ChessPosition(row, col)).getPieceType() == ChessPiece.PieceType.KING)
+        for (int row = 1; row <= 8; row++) {
+            for (int col = 1; col <= 8; col++) {
+                if (currentBoard.getPiece(new ChessPosition(row, col)) != null) {
+                    if (currentBoard.getPiece(new ChessPosition(row, col)).getPieceType() == ChessPiece.PieceType.KING && currentBoard.getPiece(new ChessPosition(row, col)).getTeamColor() == teamColor)
                         myKing = new ChessPosition(row, col);
                     if (currentBoard.getPiece(new ChessPosition(row, col)).getTeamColor() == opposite) {
                         piece = currentBoard.getPiece(new ChessPosition(row, col));
                         type = piece.getPieceType();
 
-                        moves = piece.CalculateMove(currentBoard, new ChessPosition(row, col), type);
+                        moves.addAll(piece.CalculateMove(currentBoard, new ChessPosition(row, col), type));
                     }
                 }
             }
         }
         for (ChessMove move : moves) {
-            if (move.getEndPosition() == myKing)
+            if (move.getEndPosition().equals(myKing))
                 return true;
         }
         return false;
@@ -189,15 +191,16 @@ public class ChessGame {
             ChessGame gameCopy = new ChessGame();
             gameCopy.setBoard(deepCopy);
             Collection<ChessMove> moves = new ArrayList<>();
+            Collection<ChessMove> finalMoves = new ArrayList<>();
             ChessPiece piece;
             ChessPiece.PieceType type;
             ChessPosition myKing = new ChessPosition(0,0);
-            for (int row = 1; row < deepCopy.squares.length; row++) {
-                for (int col = 1; col < deepCopy.squares[row].length; col++) {
-                    if (deepCopy.squares[row][col] != null) {
+            for (int row = 1; row <= 8; row++) {
+                for (int col = 1; col <= 8; col++) {
+                    if (deepCopy.getPiece(new ChessPosition(row, col)) != null) {
                         if (deepCopy.getPiece(new ChessPosition(row, col)).getPieceType() == ChessPiece.PieceType.KING)
                             myKing = new ChessPosition(row, col);
-                        if (deepCopy.getPiece(new ChessPosition(row, col)).getTeamColor() == opposite) {
+                        if (deepCopy.getPiece(new ChessPosition(row, col)).getTeamColor() != opposite) {
                             piece = deepCopy.getPiece(new ChessPosition(row, col));
                             type = piece.getPieceType();
                             moves.addAll(piece.CalculateMove(deepCopy, new ChessPosition(row, col), type));
@@ -212,10 +215,12 @@ public class ChessGame {
                     System.out.println("Invalid move:" + e.getMessage());
                 }
                 if (! isInCheck(teamColor))
-                    return false;
+                    finalMoves.add(move);
             }
+            if (finalMoves.isEmpty())
+                return true;
         }
-        return true;
+        return false;
     }
 
     /**
