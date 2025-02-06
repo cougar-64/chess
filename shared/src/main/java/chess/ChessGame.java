@@ -91,7 +91,6 @@ public class ChessGame {
         ChessPiece oldPiece = currentBoard.getPiece(move.getStartPosition());
         if (!oldPiece.getTeamColor().equals(myColor))
             throw new InvalidMoveException();
-//        Collection<ChessMove> moves = oldPiece.CalculateMove(currentBoard, move.getStartPosition(), oldPiece.getPieceType());
         Collection<ChessMove> moves = validMoves(move.getStartPosition());
         for (ChessMove myMove : moves) {
             if (myMove.equals(move)) {
@@ -108,12 +107,12 @@ public class ChessGame {
             if ((piece.getTeamColor()) != myColor)
                 currentBoard.squares[end.getRow() - 1][end.getColumn() - 1] = piece;
         }
-        if (oldPiece.getPieceType().equals(ChessPiece.PieceType.PAWN))
-            currentBoard.squares[end.getRow() - 1][end.getColumn() - 1] = new ChessPiece(teamColor, move.getPromotionPiece());
+        if (piece.getPieceType().equals(ChessPiece.PieceType.PAWN))
+            currentBoard.squares[end.getRow() - 1][end.getColumn() - 1] = new ChessPiece(myColor, move.getPromotionPiece());
         else
             currentBoard.squares[end.getRow() - 1][end.getColumn() - 1] = piece;
         currentBoard.squares[start.getRow() - 1][start.getColumn() - 1] = null;
-        setTeamTurn(otherColor);
+    setTeamTurn(otherColor);
     }
 
 
@@ -138,7 +137,8 @@ public class ChessGame {
     public boolean isInCheck(TeamColor teamColor) {
         ChessPosition myKing = new ChessPosition(0, 0);
         ChessBoard currentBoard = getBoard();
-        Collection<ChessMove> moves = enemyMoves(teamColor);
+        TeamColor opposite = teamColor.opposite();
+        Collection<ChessMove> moves = enemyMoves(opposite);
         for (int row = 1; row <= 8; row++) {
             for (int col = 1; col <= 8; col++) {
                 if (currentBoard.getPiece(new ChessPosition(row, col)) != null) {
@@ -161,25 +161,20 @@ public class ChessGame {
      * @return True if the specified team is in checkmate
      */
     public boolean isInCheckmate(TeamColor teamColor) {
-//        if (isInCheck(teamColor)) {
-//            ChessBoard currentBoard = getBoard();
-//            ChessBoard deepCopy = currentBoard.createClone();
-//            ChessGame gameCopy = new ChessGame();
-//            gameCopy.setBoard(deepCopy);
-//            Collection<ChessMove> moves = myMoves(teamColor);
-//            Collection<ChessMove> finalMoves = new ArrayList<>();
-//            for (ChessMove move : moves) {
-//                try {
-//                    gameCopy.makeMove(move);
-//                } catch (InvalidMoveException e) {
-//                    System.out.println("Invalid move:" + e.getMessage());
-//                }
-//                if (!gameCopy.isInCheck(teamColor))
-//                    finalMoves.add(move);
-//            }
-//            if (finalMoves.isEmpty())
-//                return true;
-//        }
+        if (isInCheck(teamColor)) {
+            Collection<ChessMove> moves = new ArrayList<>();
+            ChessBoard currentBoard = getBoard();
+            for (int row = 1; row <= 8; row++) {
+                for (int col = 1; col <= 8; col++) {
+                    if (currentBoard.getPiece(new ChessPosition(row, col)) != null) {
+                        if (currentBoard.getPiece(new ChessPosition(row, col)).getTeamColor() == teamColor)
+                            moves.addAll(validMoves(new ChessPosition(row, col)));
+                    }
+                }
+            }
+            if (moves.isEmpty())
+                return true;
+        }
         return false;
     }
 
@@ -196,7 +191,6 @@ public class ChessGame {
 
 
     public Collection<ChessMove> enemyMoves(TeamColor teamColor) {
-        TeamColor opposite = teamColor.opposite();
         ChessBoard currentBoard = getBoard();
         ChessBoard deepCopy = currentBoard.createClone();
         Collection<ChessMove> moves = new ArrayList<>();
@@ -205,7 +199,7 @@ public class ChessGame {
         for (int row = 1; row <= 8; row++) {
             for (int col = 1; col <= 8; col++) {
                 if (deepCopy.getPiece(new ChessPosition(row, col)) != null) {
-                    if (deepCopy.getPiece(new ChessPosition(row, col)).getTeamColor() == opposite) {
+                    if (deepCopy.getPiece(new ChessPosition(row, col)).getTeamColor() == teamColor) {
                         piece = deepCopy.getPiece(new ChessPosition(row, col));
                         type = piece.getPieceType();
                         moves.addAll(piece.CalculateMove(deepCopy, new ChessPosition(row, col), type));
