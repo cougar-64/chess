@@ -11,11 +11,11 @@ import java.util.Collection;
  * signature of the existing methods.
  */
 public class ChessGame {
-    protected ChessBoard board;
+    protected ChessBoard board = new ChessBoard();
     protected TeamColor teamColor = TeamColor.WHITE;
 
     public ChessGame() {
-
+        board.resetBoard();
     }
 
     /**
@@ -107,12 +107,12 @@ public class ChessGame {
             if ((piece.getTeamColor()) != myColor)
                 currentBoard.squares[end.getRow() - 1][end.getColumn() - 1] = piece;
         }
-        if (piece.getPieceType().equals(ChessPiece.PieceType.PAWN))
+        if (piece.getPieceType().equals(ChessPiece.PieceType.PAWN) && (end.getRow() == 1 || end.getRow() == 8))
             currentBoard.squares[end.getRow() - 1][end.getColumn() - 1] = new ChessPiece(myColor, move.getPromotionPiece());
         else
             currentBoard.squares[end.getRow() - 1][end.getColumn() - 1] = piece;
         currentBoard.squares[start.getRow() - 1][start.getColumn() - 1] = null;
-    setTeamTurn(otherColor);
+        setTeamTurn(otherColor);
     }
 
 
@@ -120,8 +120,9 @@ public class ChessGame {
         ChessPiece piece = board.getPiece(move.getStartPosition());
         ChessPosition start = move.getStartPosition();
         ChessPosition end = move.getEndPosition();
-        if (piece.getPieceType().equals(ChessPiece.PieceType.PAWN))
-            board.squares[end.getRow() - 1][end.getColumn() - 1] = new ChessPiece(teamColor, move.getPromotionPiece());
+        TeamColor myColor = getTeamTurn();
+        if (piece.getPieceType().equals(ChessPiece.PieceType.PAWN) && (end.getRow() == 1 || end.getRow() == 8))
+            board.squares[end.getRow() - 1][end.getColumn() - 1] = new ChessPiece(myColor, move.getPromotionPiece());
         else
             board.squares[end.getRow() - 1][end.getColumn() - 1] = piece;
         board.squares[start.getRow() - 1][start.getColumn() - 1] = null;
@@ -186,7 +187,21 @@ public class ChessGame {
      * @return True if the specified team is in stalemate, otherwise false
      */
     public boolean isInStalemate(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        if (!isInCheck(teamColor)) {
+            Collection<ChessMove> moves = new ArrayList<>();
+            ChessBoard currentBoard = getBoard();
+            for (int row = 1; row <= 8; row++) {
+                for (int col = 1; col <= 8; col++) {
+                    if (currentBoard.getPiece(new ChessPosition(row, col)) != null) {
+                        if (currentBoard.getPiece(new ChessPosition(row, col)).getTeamColor() == teamColor)
+                            moves.addAll(validMoves(new ChessPosition(row, col)));
+                    }
+                }
+            }
+            if (moves.isEmpty())
+                return true;
+        }
+        return false;
     }
 
 
@@ -199,10 +214,12 @@ public class ChessGame {
         for (int row = 1; row <= 8; row++) {
             for (int col = 1; col <= 8; col++) {
                 if (deepCopy.getPiece(new ChessPosition(row, col)) != null) {
-                    if (deepCopy.getPiece(new ChessPosition(row, col)).getTeamColor() == teamColor) {
-                        piece = deepCopy.getPiece(new ChessPosition(row, col));
-                        type = piece.getPieceType();
-                        moves.addAll(piece.CalculateMove(deepCopy, new ChessPosition(row, col), type));
+                    if (deepCopy.getPiece(new ChessPosition(row, col)).getPieceType() != null) {
+                        if (deepCopy.getPiece(new ChessPosition(row, col)).getTeamColor() == teamColor) {
+                            piece = deepCopy.getPiece(new ChessPosition(row, col));
+                            type = piece.getPieceType();
+                            moves.addAll(piece.CalculateMove(deepCopy, new ChessPosition(row, col), type));
+                        }
                     }
                 }
             }
@@ -239,8 +256,6 @@ public class ChessGame {
      * @return the chessboard
      */
     public ChessBoard getBoard() {
-        if (board == null)
-            return new ChessBoard();
         return board;
     }
 }
