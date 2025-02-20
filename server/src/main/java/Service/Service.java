@@ -1,8 +1,6 @@
 package Service;
 import dataaccess.DataAccess;
-import server.Registration_info;
-
-import javax.xml.crypto.Data;
+import Model.UserData;
 
 public class Service {
     private final DataAccess dataaccess;
@@ -10,10 +8,11 @@ public class Service {
         this.dataaccess = dataaccess;
     }
 
-    public String register(Registration_info req) {
+    public String register(UserData req) {
         var info = dataaccess.getUser(req.username());
         if (info == null) {
-
+            dataaccess.createUser(req);
+            dataaccess.createAuth
         }
     }
 }

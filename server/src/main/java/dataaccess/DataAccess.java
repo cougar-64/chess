@@ -1,5 +1,7 @@
 package dataaccess;
+import Model.UserData;
 
 public interface DataAccess {
-    String getUser(String username);
+    UserData getUser(String username);
+    void createUser(UserData r);
 }
