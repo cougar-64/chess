@@ -12,7 +12,11 @@ public class Service {
         var info = dataaccess.getUser(req.username());
         if (info == null) {
             dataaccess.createUser(req);
-            dataaccess.createAuth
+            dataaccess.createAuth(req.username());
         }
+        else if (info != null) {
+            return "Error: already taken";
+        }
+        return
     }
 }
