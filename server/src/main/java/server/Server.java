@@ -1,6 +1,9 @@
 package server;
 
 import spark.*;
+import com.google.gson.Gson;
+import java.util.Map;
+import Service.Service;
 
 public class Server {
 
@@ -10,6 +13,7 @@ public class Server {
         Spark.staticFiles.location("web");
 
         // Register your endpoints and handle exceptions here.
+        Spark.post("/user", this::register);
 
         //This line initializes the server and can be removed once you have a functioning endpoint 
         Spark.init();
@@ -21,5 +25,23 @@ public class Server {
     public void stop() {
         Spark.stop();
         Spark.awaitStop();
+    }
+
+    private Object register(Request req, Response res) throws Exception {
+        var info = new Gson().fromJson(req.body(), Map.class);
+        String username = null;
+        String password = null;
+        String email = null;
+        try {
+            username = (String) info.get("username");
+            password = (String) info.get("password");
+            email = (String) info.get("email");
+        } catch (Exception e) {
+            System.out.println("username, password, or email has incorrect syntax!");
+        }
+        Registration_info r = new Registration_info(username, password, email);
+        Service s = new Service();
+        var registered = s.register(r);
+        return new Gson().toJson(registered);
     }
 }
