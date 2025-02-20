@@ -1,6 +1,7 @@
 package server;
 
 import Model.UserData;
+import dataaccess.DataAccess;
 import spark.*;
 import com.google.gson.Gson;
 import java.util.Map;
@@ -40,9 +41,10 @@ public class Server {
         } catch (Exception e) {
             System.out.println("username, password, or email has incorrect syntax!");
         }
-        UserData u = new UserData(username, password, email);
-        Service s = new Service();
-        var registered = s.register(u);
-        return new Gson().toJson(registered);
+//        UserData u = new UserData(username, password, email);
+//        Service s = new Service();
+//        var registered = s.register(u);
+//        return new Gson().toJson(registered);
+        return new Object();
     }
 }
