@@ -17,6 +17,6 @@ public class Service {
         else if (info != null) {
             return "Error: already taken";
         }
-        return
+        return "test";
     }
 }
