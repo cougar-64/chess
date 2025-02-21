@@ -1,10 +1,13 @@
 package dataaccess;
 import model.UserData;
 import model.AuthData;
+import java.util.List;
 
 public interface DataAccess {
     UserData getUser(String username);
     void createUser(UserData r);
-    String createAuth(String username);
-    AuthData getAuth(String auth);
+    AuthData createAuth(String username);
+    AuthData getAuthData(String auth);
+    void deleteAuth(AuthData a);
+    List listGames();
 }

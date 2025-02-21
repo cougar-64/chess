@@ -1,8 +1,9 @@
 package Service;
 import dataaccess.DataAccess;
 import model.UserData;
+import model.AuthData;
 import exception.ResponseException;
-import spark.Response;
+import java.util.List;
 
 public class Service {
     private final DataAccess dataaccess;
@@ -10,14 +11,45 @@ public class Service {
         this.dataaccess = dataaccess;
     }
 
-    public String register(UserData req) throws ResponseException {
+
+    public AuthData registerRequest(UserData req) throws ResponseException {
         var info = dataaccess.getUser(req.username());
         if (info == null) {
             dataaccess.createUser(req);
             return dataaccess.createAuth(req.username());
         }
         else {
-            throw new ResponseException(403, "Error: Already taken");
+            return null;
         }
+    }
+
+
+    public AuthData loginRequest(UserData req) throws ResponseException {
+        var info = dataaccess.getUser(req.username());
+        if (info == null) {
+            throw new ResponseException(401, "Error: unauthorized");
+        }
+        if (info.password().equals(req.password())) {
+            throw new ResponseException(401, "Error: unauthorized");
+        }
+        return dataaccess.createAuth(req.username());
+    }
+
+
+    public void logoutRequest(String authToken) throws ResponseException {
+        AuthData auth = dataaccess.getAuthData(authToken);
+        if (auth == null) {
+            throw new ResponseException(401, "Error: unauthorized");
+        }
+        dataaccess.deleteAuth(auth);
+    }
+
+
+    public List gameListRequest(String authToken) {
+        AuthData auth = dataaccess.getAuthData(authToken);
+        if (auth == null) {
+            throw new ResponseException(401, "Error: unauthorized");
+        }
+        dataaccess.listGames();
     }
 }
