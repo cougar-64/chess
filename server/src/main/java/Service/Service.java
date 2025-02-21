@@ -1,6 +1,8 @@
 package Service;
 import dataaccess.DataAccess;
-import Model.UserData;
+import model.UserData;
+import exception.ResponseException;
+import spark.Response;
 
 public class Service {
     private final DataAccess dataaccess;
@@ -8,15 +10,14 @@ public class Service {
         this.dataaccess = dataaccess;
     }
 
-    public String register(UserData req) {
+    public String register(UserData req) throws ResponseException {
         var info = dataaccess.getUser(req.username());
         if (info == null) {
             dataaccess.createUser(req);
-            dataaccess.createAuth(req.username());
+            return dataaccess.createAuth(req.username());
         }
-        else if (info != null) {
-            return "Error: already taken";
+        else {
+            throw new ResponseException(403, "Error: Already taken");
         }
-        return "test";
     }
 }

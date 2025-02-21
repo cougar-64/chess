@@ -2,8 +2,8 @@ package dataaccess;
 import java.util.HashMap;
 import java.util.UUID;
 
-import Model.UserData;
-import Model.AuthData;
+import model.UserData;
+import model.AuthData;
 
 public class InMemoryDA implements DataAccess {
     private final HashMap<String, UserData> user = new HashMap<>();
@@ -17,13 +17,23 @@ public class InMemoryDA implements DataAccess {
         user.put(r.username(), r);
     }
 
-    public void createAuth(String username) {
+    public String createAuth(String username) {
         String authToken = generateAuthToken();
         AuthData a = new AuthData(username, authToken);
         auth.put(username, a);
+        return authToken;
     }
 
     public static String generateAuthToken() {
         return UUID.randomUUID().toString();
+    }
+
+    public AuthData getAuth(String authentication) {
+        for (HashMap.Entry<String, AuthData> entry : auth.entrySet()) {
+            if (entry.getValue().authToken().equals(authentication)) {
+                return entry.getValue();
+            }
+        }
+        return null;
     }
 }
