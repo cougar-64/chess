@@ -1,7 +1,6 @@
 package dataaccess;
-import model.UserData;
-import model.AuthData;
-import java.util.List;
+import model.*;
+import java.util.ArrayList;
 
 public interface DataAccess {
     UserData getUser(String username);
@@ -9,5 +8,5 @@ public interface DataAccess {
     AuthData createAuth(String username);
     AuthData getAuthData(String auth);
     void deleteAuth(AuthData a);
-    List listGames();
+    ArrayList<GameData> listGames();
 }

@@ -70,9 +70,6 @@ public class Server {
             var info = new Gson().fromJson(req.body(), Map.class);
             String username = (String) info.get("username");
             String password = (String) info.get("password");
-            if (!(username instanceof String) || !(password instanceof String)) {
-                throw new ResponseException(400, "Error: bad request"); // This is not in the spec - why??
-            }
             UserData u = new UserData(username, password, null);
             Service s = new Service(da);
             var loggedIn = s.loginRequest(u);
@@ -91,9 +88,6 @@ public class Server {
         try {
             var info = new Gson().fromJson(req.body(), Map.class);
             String authToken = (String) info.get("authToken");
-            if (!(authToken instanceof String)) {
-                throw new ResponseException(400, "Error: bad request"); // this is also not in the spec - why??
-            }
             Service s = new Service(da);
             s.logoutRequest(authToken);
             res.status(200);
@@ -110,11 +104,15 @@ public class Server {
         try {
             var info = new Gson().fromJson(req.body(), Map.class);
             String authToken = (String) info.get("authToken");
-            if (!(authToken instanceof String)) {
-                throw new ResponseException(400, "Error: bad request");
-            }
             Service s = new Service(da);
-            s.gameListRequest(authToken);
+            var result = s.gameListRequest(authToken);
+            res.status(200);
+            return new Gson().toJson(result);
+        } catch (ResponseException r) {
+            return "[" + r.StatusCode() + "] { \"message\": \"" + r.getMessage() + "\" }";
+        } catch (Exception e) {
+            res.status(500);
+            return "[500] { \"message\": \"Error: An unexpected error occurred\" }";
         }
     }
 }

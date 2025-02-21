@@ -3,14 +3,14 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
-import java.util.List;
+import java.util.ArrayList;
 
-import model.UserData;
-import model.AuthData;
+import model.*;
 
 public class InMemoryDA implements DataAccess {
     private final HashMap<String, UserData> user = new HashMap<>();
     private final HashMap<String, AuthData> auth = new HashMap<>();
+    private final HashMap<String, GameData> games = new HashMap<>();
 
     public UserData getUser(String username) {
         return user.get(username);
@@ -49,7 +49,11 @@ public class InMemoryDA implements DataAccess {
         }
     }
 
-    public List listGames() {
-
+    public ArrayList<GameData> listGames() {
+        ArrayList<GameData> allGames = new ArrayList<>();
+        for (HashMap.Entry<String, GameData> entry : games.entrySet()) {
+            allGames.add(entry.getValue());
+        }
+        return allGames;
     }
 }

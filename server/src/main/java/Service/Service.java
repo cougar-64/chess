@@ -1,9 +1,12 @@
 package Service;
 import dataaccess.DataAccess;
+import model.GameData;
 import model.UserData;
 import model.AuthData;
 import exception.ResponseException;
-import java.util.List;
+import org.eclipse.jetty.client.ResponseNotifier;
+
+import java.util.ArrayList;
 
 public class Service {
     private final DataAccess dataaccess;
@@ -45,11 +48,11 @@ public class Service {
     }
 
 
-    public List gameListRequest(String authToken) {
+    public ArrayList<GameData> gameListRequest(String authToken) throws ResponseException {
         AuthData auth = dataaccess.getAuthData(authToken);
         if (auth == null) {
             throw new ResponseException(401, "Error: unauthorized");
         }
-        dataaccess.listGames();
+        return dataaccess.listGames();
     }
 }
