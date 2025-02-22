@@ -63,4 +63,43 @@ public class Service {
         }
         return dataaccess.createGame(gameName);
     }
+
+    public void joinGameRequest(String authToken, String playerColor, int gameID) throws ResponseException {
+        AuthData auth = dataaccess.getAuthData(authToken);
+        if (auth == null) {
+            throw new ResponseException(401, "Error: unauthorized");
+        }
+        GameData game = dataaccess.getGame(gameID);
+        if (game == null) {
+            throw new ResponseException(400, "Error: bad request");
+        }
+        String playerColorSuccess = getPlayerColor(playerColor, game);
+        dataaccess.updateGameData(playerColorSuccess, game);
+    }
+
+    public String getPlayerColor(String playerColor, GameData game) throws ResponseException {
+        /**
+         * The purpose of this function is to handle the logic of checking if
+         * the desired player color is already taken and throw exceptions for
+         * already taken colors and input that is not "BLACK/WHITE".
+         * Thus, we don't need to worry about checking for anything in the caller method.
+         */
+        if (playerColor.equals("WHITE")) {
+            if (game.whiteUsername() != null) {
+                throw new ResponseException(400, "Error: bad request");
+            }
+            return "WHITE";
+        }
+
+        else if (playerColor.equals("BLACK")) {
+            if (game.blackUsername() != null) {
+                throw new ResponseException(400, "Error: bad request");
+            }
+            return "BLACK";
+        }
+
+        else {
+            throw new ResponseException(400, "Error: bad request");
+        }
+    }
 }

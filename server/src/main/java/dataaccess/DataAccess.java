@@ -11,4 +11,7 @@ public interface DataAccess {
     ArrayList<GameData> listGames();
     int createGame(String gameName);
     int createRandomInt();
+    GameData getGame(int gameID);
+    void updateGameData(String playerColor, GameData game);
+    void deleteGameDuringUpdate(int gameID);
 }

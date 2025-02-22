@@ -10,9 +10,9 @@ import chess.ChessGame;
 import model.*;
 
 public class InMemoryDA implements DataAccess {
-    private final HashMap<String, UserData> user = new HashMap<>();
-    private final HashMap<String, AuthData> auth = new HashMap<>();
-    private final HashMap<String, GameData> games = new HashMap<>();
+    private final HashMap<String, UserData> user = new HashMap<>(); // takes username paired with UserData
+    private final HashMap<String, AuthData> auth = new HashMap<>(); // takes authToken paired with AuthData
+    private final HashMap<String, GameData> games = new HashMap<>(); // takes gameName paired with GameData
 
     public UserData getUser(String username) {
         return user.get(username);
@@ -65,6 +65,36 @@ public class InMemoryDA implements DataAccess {
         GameData g = new GameData(gameID, null, null, gameName, game);
         games.put(gameName, g);
         return gameID;
+    }
+
+    public GameData getGame(int gameID) {
+        for (HashMap.Entry<String, GameData> game : games.entrySet()) {
+            if (game.getValue().gameID() == gameID) {
+                return game.getValue();
+            }
+        }
+        return null;
+    }
+
+    public void deleteGameDuringUpdate(int gameID) {
+        for (Iterator<HashMap.Entry<String, GameData>> iterator = games.entrySet().iterator(); iterator.hasNext(); ) {
+            Map.Entry<String, GameData> entry = iterator.next();
+            if (entry.getValue().gameID() == (gameID)) {
+                iterator.remove();
+            }
+        }
+    }
+
+    public void updateGameData(String playerColor, GameData game) {
+        GameData newGame;
+        if (playerColor.equals("WHITE")) {
+            newGame = new GameData(game.gameID(), playerColor, game.blackUsername(), game.gameName(), game.game());
+        }
+        else {
+            newGame = new GameData(game.gameID(), game.whiteUsername(), playerColor, game.gameName(), game.game());
+        }
+        deleteGameDuringUpdate(game.gameID());
+        games.put(game.gameName(), newGame);
     }
 
     public int createRandomInt() {
