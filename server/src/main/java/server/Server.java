@@ -1,6 +1,6 @@
 package server;
 
-import model.UserData;
+import model.*;
 import dataaccess.InMemoryDA;
 import spark.*;
 import com.google.gson.Gson;
@@ -20,6 +20,7 @@ public class Server {
         Spark.post("/session", this::login);
         Spark.delete("/session", this::logout);
         Spark.get("/game", this::getGame);
+        Spark.post("/game", this::createGame);
         Spark.exception(ResponseException.class, this::exceptionHandler);
 
         //This line initializes the server and can be removed once you have a functioning endpoint 
@@ -104,8 +105,7 @@ public class Server {
 
     private Object getGame(Request req, Response res) {
         try {
-            var info = new Gson().fromJson(req.body(), Map.class);
-            String authToken = (String) info.get("authToken");
+            String authToken = req.headers("authorization");
             Service s = new Service(da);
             var result = s.gameListRequest(authToken);
             res.status(200);
@@ -116,6 +116,24 @@ public class Server {
         } catch (Exception e) {
             res.status(500);
             return new Gson().toJson(e.getMessage());
+        }
+    }
+
+    private Object createGame(Request req, Response res) {
+        try {
+            String authToken = req.headers("authorization");
+            var info = new Gson().fromJson(req.body(), Map.class);
+            String gameName = (String) info.get("gameName");
+            Service s = new Service(da);
+            var result = s.createGameRequest(authToken, gameName);
+            res.status(200);
+            return new Gson().toJson(result);
+        } catch (ResponseException r) {
+            res.status(r.statusCode());
+            return new Gson().toJson(r.getMessage());
+        } catch (Exception e) {
+            res.status(500);
+                return new Gson().toJson(e.getMessage());
         }
     }
 }

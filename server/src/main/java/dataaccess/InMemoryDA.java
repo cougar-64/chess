@@ -4,7 +4,9 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
 import java.util.ArrayList;
+import java.util.Random;
 
+import chess.ChessGame;
 import model.*;
 
 public class InMemoryDA implements DataAccess {
@@ -56,4 +58,33 @@ public class InMemoryDA implements DataAccess {
         }
         return allGames;
     }
+
+    public int createGame(String gameName) {
+        int gameID = createRandomInt();
+        ChessGame game = new ChessGame();
+        GameData g = new GameData(gameID, null, null, gameName, game);
+        games.put(gameName, g);
+        return gameID;
+    }
+
+    public int createRandomInt() {
+        Random random = new Random();
+        int randInt;
+        do {
+            randInt = 1000 + random.nextInt(9000);
+            boolean exists = false;
+            for (GameData game : games.values()) {
+                if (game.gameID() == randInt) {
+                    exists = true;
+                    break;
+                }
+            }
+            if (!exists) {
+                break;
+            }
+        } while (true);
+
+        return randInt;
+    }
+
 }

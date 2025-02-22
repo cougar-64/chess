@@ -4,6 +4,7 @@ import model.GameData;
 import model.UserData;
 import model.AuthData;
 import exception.ResponseException;
+import org.eclipse.jetty.server.Response;
 
 import java.util.ArrayList;
 
@@ -53,5 +54,13 @@ public class Service {
             throw new ResponseException(401, "Error: unauthorized");
         }
         return dataaccess.listGames();
+    }
+
+    public int createGameRequest(String authToken, String gameName) throws ResponseException{
+        AuthData auth = dataaccess.getAuthData(authToken);
+        if (auth == null) {
+            throw new ResponseException(401, "Error: unauthorized");
+        }
+        return dataaccess.createGame(gameName);
     }
 }
