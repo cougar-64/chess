@@ -22,6 +22,7 @@ public class Server {
         Spark.get("/game", this::getGame);
         Spark.post("/game", this::createGame);
         Spark.put("/game", this::joinGame);
+        Spark.delete("/db", this::deleteDataBase);
         Spark.exception(ResponseException.class, this::exceptionHandler);
 
         //This line initializes the server and can be removed once you have a functioning endpoint 
@@ -156,6 +157,13 @@ public class Server {
             res.status(500);
             return new Gson().toJson(e.getMessage());
         }
+    }
+
+    private Object deleteDataBase(Request req, Response res) {
+        Service s = new Service(da);
+        s.deleteDataBase();
+        res.status(200);
+        return "{}";
     }
 
 }

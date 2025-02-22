@@ -97,6 +97,18 @@ public class InMemoryDA implements DataAccess {
         games.put(game.gameName(), newGame);
     }
 
+    public void deleteUserDataBase() {
+        user.clear();
+    }
+
+    public void deleteAuthDataBase() {
+        auth.clear();
+    }
+
+    public void deleteGameDataBase() {
+        games.clear();
+    }
+
     public int createRandomInt() {
         Random random = new Random();
         int randInt;

@@ -102,4 +102,10 @@ public class Service {
             throw new ResponseException(400, "Error: bad request");
         }
     }
+
+    public void deleteDataBase() {
+        dataaccess.deleteUserDataBase();
+        dataaccess.deleteAuthDataBase();
+        dataaccess.deleteGameDataBase();
+    }
 }

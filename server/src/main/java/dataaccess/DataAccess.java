@@ -14,4 +14,7 @@ public interface DataAccess {
     GameData getGame(int gameID);
     void updateGameData(String playerColor, GameData game);
     void deleteGameDuringUpdate(int gameID);
+    void deleteUserDataBase();
+    void deleteAuthDataBase();
+    void deleteGameDataBase();
 }
