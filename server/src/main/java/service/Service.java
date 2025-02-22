@@ -1,10 +1,9 @@
-package Service;
+package service;
 import dataaccess.DataAccess;
 import model.GameData;
 import model.UserData;
 import model.AuthData;
 import exception.ResponseException;
-import org.eclipse.jetty.client.ResponseNotifier;
 
 import java.util.ArrayList;
 

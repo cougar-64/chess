@@ -69,7 +69,8 @@ public class PawnMoves extends MoveCalculator {
 This function checks to see if the pawn is on the "front line", meaning the row it starts on.
 This allows for a potential 2 square move forward and en passant in the future.
  */
-    public static ArrayList<ChessMove> frontLine(ChessBoard board, ChessPosition position, ArrayList<ChessMove> legalMoves, int r, int c, int check1Square) {
+    public static ArrayList<ChessMove> frontLine(ChessBoard board, ChessPosition position,
+                                                 ArrayList<ChessMove> legalMoves, int r, int c, int check1Square) {
         ChessPosition current = position.offset(r,c);
         if (board.getPiece(current) == null && board.getPiece(position.offset(r+(check1Square), c)) == null) {
             ChessMove move = new ChessMove(position, current, null);
@@ -78,7 +79,8 @@ This allows for a potential 2 square move forward and en passant in the future.
         return legalMoves;
     }
 
-    public static ArrayList<ChessMove> move1square(ChessBoard board, ChessPosition position, ArrayList<ChessMove> legalMoves, int offset) {
+    public static ArrayList<ChessMove> move1square(ChessBoard board, ChessPosition position,
+                                                   ArrayList<ChessMove> legalMoves, int offset) {
         ChessPosition current = position.offset(offset, 0);
         ChessMove move;
         if (board.getPiece(current) == null) {
@@ -88,7 +90,8 @@ This allows for a potential 2 square move forward and en passant in the future.
         return legalMoves;
     }
 
-    public static ArrayList<ChessMove> capture(ChessBoard board, ChessPosition position, ArrayList<ChessMove> legalMoves, int r, int c, ChessPiece.PieceType promotion) {
+    public static ArrayList<ChessMove> capture(ChessBoard board, ChessPosition position,
+                                               ArrayList<ChessMove> legalMoves, int r, int c, ChessPiece.PieceType promotion) {
             ChessPosition current = position.offset(r, c);
             if (current.getRow() > 0 && current.getRow() <= 8 && current.getColumn() > 0 && current.getColumn() <= 8) {
                 ChessMove move;
@@ -101,7 +104,8 @@ This allows for a potential 2 square move forward and en passant in the future.
             return null;
     }
 
-    public static ArrayList<ChessMove> straightPromotion(ChessBoard board, ChessPosition position, ArrayList<ChessMove> legalMoves, int r, int c, ChessPiece.PieceType promotion) {
+    public static ArrayList<ChessMove> straightPromotion(ChessBoard board, ChessPosition position,
+                                                         ArrayList<ChessMove> legalMoves, int r, int c, ChessPiece.PieceType promotion) {
         ChessPosition current = position.offset(r, c);
         ChessMove move = new ChessMove(position, current, promotion);
         legalMoves.add(move);

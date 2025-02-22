@@ -5,7 +5,7 @@ import dataaccess.InMemoryDA;
 import spark.*;
 import com.google.gson.Gson;
 import java.util.Map;
-import Service.Service;
+import service.Service;
 import exception.ResponseException;
 
 public class Server {
@@ -35,7 +35,7 @@ public class Server {
     }
 
     private void exceptionHandler(ResponseException ex, Request req, Response res) {
-        res.status(ex.StatusCode());
+        res.status(ex.statusCode());
         res.body(ex.toJson());
     }
 
@@ -57,7 +57,7 @@ public class Server {
             res.status(200);
             return new Gson().toJson(registered);
         } catch (ResponseException r) {
-            res.status(r.StatusCode());
+            res.status(r.statusCode());
             return new Gson().toJson(r.getMessage());
         } catch (Exception e) {
             res.status(500);
@@ -77,7 +77,7 @@ public class Server {
             res.status(200);
             return new Gson().toJson(loggedIn);
         } catch (ResponseException r) {
-            res.status(r.StatusCode());
+            res.status(r.statusCode());
             return new Gson().toJson(r.getMessage());
         } catch (Exception e) {
             res.status(500);
@@ -94,7 +94,7 @@ public class Server {
             res.status(200);
             return "{}";
         } catch (ResponseException r) {
-            res.status(r.StatusCode());
+            res.status(r.statusCode());
             return new Gson().toJson(r.getMessage());
         } catch (Exception e) {
             res.status(500);
@@ -111,7 +111,7 @@ public class Server {
             res.status(200);
             return new Gson().toJson(result);
         } catch (ResponseException r) {
-            res.status(r.StatusCode());
+            res.status(r.statusCode());
             return new Gson().toJson(r.getMessage());
         } catch (Exception e) {
             res.status(500);

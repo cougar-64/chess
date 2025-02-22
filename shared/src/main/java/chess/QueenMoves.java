@@ -13,46 +13,54 @@ public class QueenMoves extends MoveCalculator {
 
         for (ChessPosition current = position.offset(1,-1); current.getRow() <= 8 && current.getColumn() > 0;
             current = current.offset(1, -1)) {
-            if (checkPosition(board, current, legalMoves, myColor, position))
+            if (checkPosition(board, current, legalMoves, myColor, position)) {
                 break;
+            }
         }
 
         for (ChessPosition current = position.offset(-1,-1); current.getRow() > 0 && current.getColumn() > 0;
             current = current.offset(-1, -1)) {
-            if (checkPosition(board, current, legalMoves, myColor, position))
+            if (checkPosition(board, current, legalMoves, myColor, position)) {
                 break;
+            }
         }
 
         for (ChessPosition current = position.offset(-1,1); current.getRow() > 0 && current.getColumn() <= 8; // infiniate loop in this function
             current = current.offset(-1,1)) {
-            if (checkPosition(board, current, legalMoves, myColor, position))
+            if (checkPosition(board, current, legalMoves, myColor, position)) {
                 break;
+            }
         }
 
         for (ChessPosition current = position.offset(1,1); current.getRow() <= 8 && current.getColumn() <= 8;
             current = current.offset(1,1)) {
-            if (checkPosition(board, current, legalMoves, myColor, position))
+            if (checkPosition(board, current, legalMoves, myColor, position)) {
                 break;
+            }
         }
 
         for (ChessPosition current = position.offset(0,1); current.getColumn() <= 8; current = current.offset(0,1)) {
-            if (checkPosition(board, current, legalMoves, myColor, position))
+            if (checkPosition(board, current, legalMoves, myColor, position)) {
                 break;
+            }
         }
 
         for (ChessPosition current = position.offset(0,-1);  current.getColumn() > 0; current = current.offset(0,-1)) {
-            if (checkPosition(board, current, legalMoves, myColor, position))
+            if (checkPosition(board, current, legalMoves, myColor, position)) {
                 break;
+            }
         }
 
         for (ChessPosition current = position.offset(1,0); current.getRow() <= 8; current = current.offset(1,0)) {
-            if (checkPosition(board, current, legalMoves, myColor, position))
+            if (checkPosition(board, current, legalMoves, myColor, position)) {
                 break;
+            }
         }
 
         for (ChessPosition current = position.offset(-1,0); current.getRow() > 0; current = current.offset(-1, 0)) {
-            if (checkPosition(board, current, legalMoves, myColor, position))
+            if (checkPosition(board, current, legalMoves, myColor, position)) {
                 break;
+            }
         }
         return legalMoves;
     }

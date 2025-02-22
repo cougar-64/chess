@@ -8,12 +8,12 @@ package chess;
  */
 public class ChessPosition {
 
-    private final int ROW;
-    private final int COL;
+    private final int row;
+    private final int col;
 
     public ChessPosition(int row, int col) {
-        this.ROW = row;
-        this.COL = col;
+        this.row = row;
+        this.col = col;
     }
 
     /**
@@ -21,7 +21,7 @@ public class ChessPosition {
      * 1 codes for the bottom row
      */
     public int getRow() {
-        return ROW;
+        return row;
     }
 
     /**
@@ -29,11 +29,11 @@ public class ChessPosition {
      * 1 codes for the left row
      */
     public int getColumn() {
-        return COL;
+        return col;
     }
 
     public ChessPosition offset(int rowOffset, int colOffset) {
-        return new ChessPosition(this.ROW + rowOffset, this.COL + colOffset);
+        return new ChessPosition(this.row + rowOffset, this.col + colOffset);
     }
 
     public boolean equals(Object obj) {
@@ -44,17 +44,17 @@ public class ChessPosition {
             return false;
         }
         ChessPosition other = (ChessPosition) obj;
-        return this.ROW == other.ROW && this.COL == other.COL;
+        return this.row == other.row && this.col == other.col;
     }
     public int hashCode() {
-        return 31* ROW + COL;
+        return 31* row + col;
     }
 
     @Override
     public String toString() {
         return "ChessPosition{" +
-                "ROW=" + ROW +
-                ", COL=" + COL +
+                "ROW=" + row +
+                ", COL=" + col +
                 '}';
     }
 }

@@ -54,11 +54,11 @@ public class ChessPiece implements Cloneable {
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
         ChessPiece.PieceType pieceType = getPieceType();
-        Collection<ChessMove> possibleMoves = CalculateMove(board, myPosition, pieceType);
+        Collection<ChessMove> possibleMoves = calculateMove(board, myPosition, pieceType);
         return possibleMoves;
     }
 
-    public Collection<ChessMove> CalculateMove(ChessBoard board, ChessPosition myPosition, ChessPiece.PieceType pieceType) {
+    public Collection<ChessMove> calculateMove(ChessBoard board, ChessPosition myPosition, ChessPiece.PieceType pieceType) {
         Collection<ChessMove> moves = new ArrayList<>();
         switch (pieceType) {
             case BISHOP:

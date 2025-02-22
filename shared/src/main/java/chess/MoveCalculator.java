@@ -28,7 +28,8 @@ public class MoveCalculator {
             return null;
     }
 
-    public static boolean checkPosition(ChessBoard board, ChessPosition current, Collection<ChessMove> legalMoves, ChessGame.TeamColor myColor, ChessPosition position) {
+    public static boolean checkPosition(ChessBoard board, ChessPosition current,
+                                        Collection<ChessMove> legalMoves, ChessGame.TeamColor myColor, ChessPosition position) {
         if (board.getPiece(current) == null) {
             ChessMove move = isNull(current.getRow(), current.getColumn(), position);
             legalMoves.add(move);
