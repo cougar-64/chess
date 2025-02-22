@@ -19,13 +19,15 @@ public class MoveCalculator {
     public static ChessMove isNotNull(int r, int c, ChessPosition position, ChessBoard board, ChessGame.TeamColor myColor) {
         ChessPosition newPosition = new ChessPosition(r, c);
         ChessPiece piece = board.getPiece(newPosition);
-        if (piece == null)
+        if (piece == null) {
             return null;
+        }
         ChessGame.TeamColor otherColor = piece.getTeamColor();
         if (otherColor != myColor) {
             return new ChessMove(position, newPosition, null);
-        } else
+        } else {
             return null;
+        }
     }
 
     public static boolean checkPosition(ChessBoard board, ChessPosition current,
@@ -40,8 +42,9 @@ public class MoveCalculator {
             if (move != null) {
                 legalMoves.add(move);
                 return true;
-            }   else
+            }   else {
                 return true;
+            }
         }
         return false;
     }

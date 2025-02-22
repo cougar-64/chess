@@ -12,8 +12,9 @@ public class PawnMoves extends MoveCalculator {
         ChessGame.TeamColor myColor = (board.getPiece(position).getTeamColor());
 
         if (myColor == ChessGame.TeamColor.WHITE) {
-            if (position.getRow() == 2)
-                frontLine(board, position, legalMoves, 2,0, -1);
+            if (position.getRow() == 2) {
+                frontLine(board, position, legalMoves, 2, 0, -1);
+            }
             if (position.getRow() == 7) {
                 ChessPosition offset = position.offset(1,0);
                 if (board.getPiece(offset) == null) {
@@ -37,8 +38,9 @@ public class PawnMoves extends MoveCalculator {
             capture(board, position, legalMoves, 1,1, null);
         }
         if (myColor == ChessGame.TeamColor.BLACK) {
-            if (position.getRow() == 7)
-                frontLine(board, position, legalMoves, -2, 0,1);
+            if (position.getRow() == 7) {
+                frontLine(board, position, legalMoves, -2, 0, 1);
+            }
             if (position.getRow() == 2) {
                 ChessPosition offset = position.offset(-1,0);
                 if (board.getPiece(offset) == null) {

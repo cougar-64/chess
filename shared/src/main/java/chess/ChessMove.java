@@ -43,8 +43,9 @@ public class ChessMove {
         if (promotionPiece == null) {
             return null;
         }
-        else
+        else {
             return promotionPiece;
+        }
     }
 
     @Override

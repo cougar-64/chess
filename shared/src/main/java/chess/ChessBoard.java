@@ -21,8 +21,9 @@ public class ChessBoard implements Cloneable {
         deepCopy.squares = new ChessPiece[8][8];
         for (int i = 0; i < squares.length; i++) {
             for (int j = 0; j < squares[i].length; j++) {
-                if (this.squares[i][j] != null)
+                if (this.squares[i][j] != null) {
                     deepCopy.squares[i][j] = this.squares[i][j];
+                }
             }
         }
         return deepCopy;
