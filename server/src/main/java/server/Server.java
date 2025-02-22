@@ -57,10 +57,11 @@ public class Server {
             res.status(200);
             return new Gson().toJson(registered);
         } catch (ResponseException r) {
-            return "[" + r.StatusCode() + "] { \"message\": \"" + r.getMessage() + "\" }";
+            res.status(r.StatusCode());
+            return new Gson().toJson(r.getMessage());
         } catch (Exception e) {
             res.status(500);
-            return "[500] { \"message\": \"Error: An unexpected error occurred\" }";
+            return new Gson().toJson(e.getMessage());
         }
     }
 
@@ -76,27 +77,28 @@ public class Server {
             res.status(200);
             return new Gson().toJson(loggedIn);
         } catch (ResponseException r) {
-            return "[" + r.StatusCode() + "] { \"message\": \"" + r.getMessage() + "\" }";
+            res.status(r.StatusCode());
+            return new Gson().toJson(r.getMessage());
         } catch (Exception e) {
             res.status(500);
-            return "[500] { \"message\": \"Error: An unexpected error occurred\" }";
+            return new Gson().toJson(e.getMessage());
         }
     }
 
 
     private Object logout(Request req, Response res) {
         try {
-            var info = new Gson().fromJson(req.body(), Map.class);
-            String authToken = (String) info.get("authToken");
+            String authToken = req.headers("authorization");
             Service s = new Service(da);
             s.logoutRequest(authToken);
             res.status(200);
-            return null;
+            return "{}";
         } catch (ResponseException r) {
-            return "[" + r.StatusCode() + "] { \"message\": \"" + r.getMessage() + "\" }";
+            res.status(r.StatusCode());
+            return new Gson().toJson(r.getMessage());
         } catch (Exception e) {
             res.status(500);
-            return "[500] { \"message\": \"Error: An unexpected error occurred\" }";
+            return new Gson().toJson(e.getMessage());
         }
     }
 
@@ -109,10 +111,11 @@ public class Server {
             res.status(200);
             return new Gson().toJson(result);
         } catch (ResponseException r) {
-            return "[" + r.StatusCode() + "] { \"message\": \"" + r.getMessage() + "\" }";
+            res.status(r.StatusCode());
+            return new Gson().toJson(r.getMessage());
         } catch (Exception e) {
             res.status(500);
-            return "[500] { \"message\": \"Error: An unexpected error occurred\" }";
+            return new Gson().toJson(e.getMessage());
         }
     }
 }

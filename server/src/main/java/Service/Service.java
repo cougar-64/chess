@@ -32,7 +32,7 @@ public class Service {
         if (info == null) {
             throw new ResponseException(401, "Error: unauthorized");
         }
-        if (info.password().equals(req.password())) {
+        if (! info.password().equals(req.password())) {
             throw new ResponseException(401, "Error: unauthorized");
         }
         return dataaccess.createAuth(req.username());
