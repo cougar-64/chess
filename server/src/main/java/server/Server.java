@@ -42,113 +42,55 @@ public class Server {
         res.body(ex.toJson());
     }
 
-    private Object register(Request req, Response res) {
-        try {
-            var info = new Gson().fromJson(req.body(), Map.class);
-            String username = (String) info.get("username");
-            String password = (String) info.get("password");
-            String email = (String) info.get("email");
-            if (!(username instanceof String) || !(password instanceof String) || !(email instanceof String)) {
-                throw new ResponseException(400, "{ \"message\": \"Error: bad request\" }");
-            }
-            UserData u = new UserData(username, password, email);
-            Service s = new Service(da);
-            var registered = s.registerRequest(u);
-            if (registered == null) {
-                throw new ResponseException(403, "{ \"message\": \"Error: already taken\" }");
-            }
-            res.status(200);
-            var fullResponse = "{ \"username\":\"" + username + "\", \"authToken\":\"" + registered + "\" }";
-            return new Gson().toJson(fullResponse);
-        } catch (ResponseException r) {
-            res.status(r.statusCode());
-            return new Gson().toJson(r.getMessage());
-        } catch (Exception e) {
-            res.status(500);
-            var badMessage = "{ \"message\" : \"Error: " + e.getMessage();
-            return new Gson().toJson(badMessage);
+    private Object register(Request req, Response res) throws ResponseException {
+        var info = new Gson().fromJson(req.body(), UserData.class);
+        Service s = new Service(da);
+        var registered = s.registerRequest(info);
+        if (registered == null) {
+            throw new ResponseException(403, "Error: already taken");
         }
+        res.status(200);
+        return new Gson().toJson(registered);
     }
 
 
-    private Object login(Request req, Response res) {
-        try {
-            var info = new Gson().fromJson(req.body(), Map.class);
-            String username = (String) info.get("username");
-            String password = (String) info.get("password");
-            UserData u = new UserData(username, password, null);
+    private Object login(Request req, Response res) throws ResponseException {
+            var info = new Gson().fromJson(req.body(), UserData.class);
             Service s = new Service(da);
-            var loggedIn = s.loginRequest(u);
+            var loggedIn = s.loginRequest(info);
             res.status(200);
-            var fullResponse = "{ \"username\":\"" + username + "\", \"authToken\":\"" + loggedIn + "\" }";
-            return new Gson().toJson(fullResponse);
-        } catch (ResponseException r) {
-            res.status(r.statusCode());
-            return new Gson().toJson(r.getMessage());
-        } catch (Exception e) {
-            res.status(500);
-            var badMessage = "{ \"message\" : \"Error: " + e.getMessage();
-            return new Gson().toJson(badMessage);
-        }
+            return new Gson().toJson(loggedIn);
+
     }
 
 
-    private Object logout(Request req, Response res) {
-        try {
+    private Object logout(Request req, Response res) throws ResponseException {
             String authToken = req.headers("authorization");
             Service s = new Service(da);
             s.logoutRequest(authToken);
             res.status(200);
             return "{}";
-        } catch (ResponseException r) {
-            res.status(r.statusCode());
-            return new Gson().toJson(r.getMessage());
-        } catch (Exception e) {
-            res.status(500);
-            var badMessage = "{ \"message\" : \"Error: " + e.getMessage();
-            return new Gson().toJson(badMessage);
-        }
     }
 
-    private Object getGame(Request req, Response res) {
-        try {
+    private String getGame(Request req, Response res) throws ResponseException {
             String authToken = req.headers("authorization");
             Service s = new Service(da);
             var result = s.gameListRequest(authToken);
             res.status(200);
-            var fullResult = "{ \"games\" :" + result;
-            return new Gson().toJson(fullResult);
-        } catch (ResponseException r) {
-            res.status(r.statusCode());
-            return new Gson().toJson(r.getMessage());
-        } catch (Exception e) {
-            res.status(500);
-            var badMessage = "{ \"message\" : \"Error: " + e.getMessage();
-            return new Gson().toJson(badMessage);
-        }
-    }
-
-    private Object createGame(Request req, Response res) {
-        try {
-            String authToken = req.headers("authorization");
-            var info = new Gson().fromJson(req.body(), Map.class);
-            String gameName = (String) info.get("gameName");
-            Service s = new Service(da);
-            var result = s.createGameRequest(authToken, gameName);
-            res.status(200);
-            var fullResult = "{ \"gameID\" :" + result;
             return new Gson().toJson(result);
-        } catch (ResponseException r) {
-            res.status(r.statusCode());
-            return new Gson().toJson(r.getMessage());
-        } catch (Exception e) {
-            var badMessage = "{ \"message\" : \"Error: " + e.getMessage();
-            return new Gson().toJson(badMessage);
-        }
     }
 
-    private Object joinGame(Request req, Response res) {
-        try {
+    private Object createGame(Request req, Response res) throws ResponseException {
+            String authToken = req.headers("authorization");
+            var info = new Gson().fromJson(req.body(), GameData.class);
+            Service s = new Service(da);
+            var result = s.createGameRequest(authToken, info);
+            res.status(200);
+            return new Gson().toJson(result);
+
+    }
+
+    private Object joinGame(Request req, Response res) throws ResponseException{
             String authToken = req.headers("authorization");
             var info = new Gson().fromJson(req.body(), Map.class);
             String playerColor = (String) info.get("playerColor");
@@ -157,15 +99,7 @@ public class Server {
             Service s = new Service(da);
             s.joinGameRequest(authToken, playerColor, gameID);
             res.status(200);
-            return new Gson().toJson("{}");
-        } catch (ResponseException r) {
-            res.status(r.statusCode());
-            return new Gson().toJson(r.getMessage());
-        } catch (Exception e) {
-            res.status(500);
-            var badMessage = "{ \"message\" : \"Error: " + e.getMessage();
-            return new Gson().toJson(badMessage);
-        }
+            return "{}";
     }
 
     private Object deleteDataBase(Request req, Response res) {

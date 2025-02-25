@@ -9,7 +9,7 @@ public interface DataAccess {
     AuthData getAuthData(String auth);
     void deleteAuth(AuthData a);
     ArrayList<GameData> listGames();
-    int createGame(String gameName);
+    GameData createGame(String gameName);
     int createRandomInt();
     GameData getGame(int gameID);
     void updateGameData(String playerColor, GameData game);

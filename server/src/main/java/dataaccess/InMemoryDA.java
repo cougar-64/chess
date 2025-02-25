@@ -59,12 +59,12 @@ public class InMemoryDA implements DataAccess {
         return allGames;
     }
 
-    public int createGame(String gameName) {
+    public GameData createGame(String gameName) {
         int gameID = createRandomInt();
         ChessGame game = new ChessGame();
         GameData g = new GameData(gameID, null, null, gameName, game);
         games.put(gameName, g);
-        return gameID;
+        return g;
     }
 
     public GameData getGame(int gameID) {
