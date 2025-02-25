@@ -87,7 +87,7 @@ public class Service {
             throw new ResponseException(400, "Error: unauthorized");
         }
         String playerColorSuccess = getPlayerColor(playerColor, game);
-        dataaccess.updateGameData(playerColorSuccess, game);
+        dataaccess.updateGameData(playerColorSuccess, game, auth.username());
     }
 
     public String getPlayerColor(String playerColor, GameData game) throws ResponseException {

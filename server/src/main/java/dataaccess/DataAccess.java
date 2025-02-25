@@ -12,7 +12,7 @@ public interface DataAccess {
     GameData createGame(String gameName);
     int createRandomInt();
     GameData getGame(int gameID);
-    void updateGameData(String playerColor, GameData game);
+    void updateGameData(String playerColor, GameData game, String username);
     void deleteGameDuringUpdate(int gameID);
     void deleteUserDataBase();
     void deleteAuthDataBase();

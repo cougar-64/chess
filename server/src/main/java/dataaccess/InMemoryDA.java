@@ -85,13 +85,13 @@ public class InMemoryDA implements DataAccess {
         }
     }
 
-    public void updateGameData(String playerColor, GameData game) {
+    public void updateGameData(String playerColor, GameData game, String username) {
         GameData newGame;
         if (playerColor.equals("WHITE")) {
-            newGame = new GameData(game.gameID(), playerColor, game.blackUsername(), game.gameName(), game.game());
+            newGame = new GameData(game.gameID(), username, game.blackUsername(), game.gameName(), game.game());
         }
         else {
-            newGame = new GameData(game.gameID(), game.whiteUsername(), playerColor, game.gameName(), game.game());
+            newGame = new GameData(game.gameID(), game.whiteUsername(), username, game.gameName(), game.game());
         }
         deleteGameDuringUpdate(game.gameID());
         games.put(game.gameName(), newGame);
