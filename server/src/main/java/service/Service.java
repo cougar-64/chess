@@ -99,14 +99,14 @@ public class Service {
          */
         if (playerColor.equals("WHITE")) {
             if (game.whiteUsername() != null) {
-                throw new ResponseException(400, "Error: bad request");
+                throw new ResponseException(403, "Error: already taken");
             }
             return "WHITE";
         }
 
         else if (playerColor.equals("BLACK")) {
             if (game.blackUsername() != null) {
-                throw new ResponseException(400, "Error: bad request");
+                throw new ResponseException(403, "Error: already taken");
             }
             return "BLACK";
         }
