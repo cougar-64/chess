@@ -30,10 +30,10 @@ public class Service {
     public AuthData loginRequest(UserData req) throws ResponseException {
         var info = dataaccess.getUser(req.username());
         if (info == null) {
-            throw new ResponseException(401, "Error: unauthorized");
+            throw new ResponseException(401, "{ \"message\": \"Error: unauthorized\" }");
         }
         if (! info.password().equals(req.password())) {
-            throw new ResponseException(401, "Error: unauthorized");
+            throw new ResponseException(401, "{ \"message\": \"Error: unauthorized\" }");
         }
         return dataaccess.createAuth(req.username());
     }
@@ -42,7 +42,7 @@ public class Service {
     public void logoutRequest(String authToken) throws ResponseException {
         AuthData auth = dataaccess.getAuthData(authToken);
         if (auth == null) {
-            throw new ResponseException(401, "Error: unauthorized");
+            throw new ResponseException(401, "{ \"message\": \"Error: unauthorized\" }");
         }
         dataaccess.deleteAuth(auth);
     }
@@ -51,7 +51,7 @@ public class Service {
     public ArrayList<GameData> gameListRequest(String authToken) throws ResponseException {
         AuthData auth = dataaccess.getAuthData(authToken);
         if (auth == null) {
-            throw new ResponseException(401, "Error: unauthorized");
+            throw new ResponseException(401, "{ \"message\": \"Error: unauthorized\" }");
         }
         return dataaccess.listGames();
     }
@@ -59,7 +59,7 @@ public class Service {
     public int createGameRequest(String authToken, String gameName) throws ResponseException{
         AuthData auth = dataaccess.getAuthData(authToken);
         if (auth == null) {
-            throw new ResponseException(401, "Error: unauthorized");
+            throw new ResponseException(401, "{ \"message\": \"Error: unauthorized\" }");
         }
         return dataaccess.createGame(gameName);
     }
@@ -67,11 +67,11 @@ public class Service {
     public void joinGameRequest(String authToken, String playerColor, int gameID) throws ResponseException {
         AuthData auth = dataaccess.getAuthData(authToken);
         if (auth == null) {
-            throw new ResponseException(401, "Error: unauthorized");
+            throw new ResponseException(401, "{ \"message\": \"Error: unauthorized\" }");
         }
         GameData game = dataaccess.getGame(gameID);
         if (game == null) {
-            throw new ResponseException(400, "Error: bad request");
+            throw new ResponseException(400, "{ \"message\": \"Error: bad request\" }");
         }
         String playerColorSuccess = getPlayerColor(playerColor, game);
         dataaccess.updateGameData(playerColorSuccess, game);
@@ -86,20 +86,20 @@ public class Service {
          */
         if (playerColor.equals("WHITE")) {
             if (game.whiteUsername() != null) {
-                throw new ResponseException(400, "Error: bad request");
+                throw new ResponseException(400, "{ \"message\": \"Error: bad request\" }");
             }
             return "WHITE";
         }
 
         else if (playerColor.equals("BLACK")) {
             if (game.blackUsername() != null) {
-                throw new ResponseException(400, "Error: bad request");
+                throw new ResponseException(400, "{ \"message\": \"Error: bad request\" }");
             }
             return "BLACK";
         }
 
         else {
-            throw new ResponseException(400, "Error: bad request");
+            throw new ResponseException(400, "{ \"message\": \"Error: bad request\" }");
         }
     }
 

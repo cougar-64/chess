@@ -49,22 +49,24 @@ public class Server {
             String password = (String) info.get("password");
             String email = (String) info.get("email");
             if (!(username instanceof String) || !(password instanceof String) || !(email instanceof String)) {
-                throw new ResponseException(400, "Error: bad request");
+                throw new ResponseException(400, "{ \"message\": \"Error: bad request\" }");
             }
             UserData u = new UserData(username, password, email);
             Service s = new Service(da);
             var registered = s.registerRequest(u);
             if (registered == null) {
-                throw new ResponseException(403, "Error: Already taken");
+                throw new ResponseException(403, "{ \"message\": \"Error: already taken\" }");
             }
             res.status(200);
-            return new Gson().toJson(registered);
+            var fullResponse = "{ \"username\":\"" + username + "\", \"authToken\":\"" + registered + "\" }";
+            return new Gson().toJson(fullResponse);
         } catch (ResponseException r) {
             res.status(r.statusCode());
             return new Gson().toJson(r.getMessage());
         } catch (Exception e) {
             res.status(500);
-            return new Gson().toJson(e.getMessage());
+            var badMessage = "{ \"message\" : \"Error: " + e.getMessage();
+            return new Gson().toJson(badMessage);
         }
     }
 
@@ -78,13 +80,15 @@ public class Server {
             Service s = new Service(da);
             var loggedIn = s.loginRequest(u);
             res.status(200);
-            return new Gson().toJson(loggedIn);
+            var fullResponse = "{ \"username\":\"" + username + "\", \"authToken\":\"" + loggedIn + "\" }";
+            return new Gson().toJson(fullResponse);
         } catch (ResponseException r) {
             res.status(r.statusCode());
             return new Gson().toJson(r.getMessage());
         } catch (Exception e) {
             res.status(500);
-            return new Gson().toJson(e.getMessage());
+            var badMessage = "{ \"message\" : \"Error: " + e.getMessage();
+            return new Gson().toJson(badMessage);
         }
     }
 
@@ -101,7 +105,8 @@ public class Server {
             return new Gson().toJson(r.getMessage());
         } catch (Exception e) {
             res.status(500);
-            return new Gson().toJson(e.getMessage());
+            var badMessage = "{ \"message\" : \"Error: " + e.getMessage();
+            return new Gson().toJson(badMessage);
         }
     }
 
@@ -111,13 +116,15 @@ public class Server {
             Service s = new Service(da);
             var result = s.gameListRequest(authToken);
             res.status(200);
-            return new Gson().toJson(result);
+            var fullResult = "{ \"games\" :" + result;
+            return new Gson().toJson(fullResult);
         } catch (ResponseException r) {
             res.status(r.statusCode());
             return new Gson().toJson(r.getMessage());
         } catch (Exception e) {
             res.status(500);
-            return new Gson().toJson(e.getMessage());
+            var badMessage = "{ \"message\" : \"Error: " + e.getMessage();
+            return new Gson().toJson(badMessage);
         }
     }
 
@@ -129,13 +136,14 @@ public class Server {
             Service s = new Service(da);
             var result = s.createGameRequest(authToken, gameName);
             res.status(200);
+            var fullResult = "{ \"gameID\" :" + result;
             return new Gson().toJson(result);
         } catch (ResponseException r) {
             res.status(r.statusCode());
             return new Gson().toJson(r.getMessage());
         } catch (Exception e) {
-            res.status(500);
-                return new Gson().toJson(e.getMessage());
+            var badMessage = "{ \"message\" : \"Error: " + e.getMessage();
+            return new Gson().toJson(badMessage);
         }
     }
 
@@ -155,7 +163,8 @@ public class Server {
             return new Gson().toJson(r.getMessage());
         } catch (Exception e) {
             res.status(500);
-            return new Gson().toJson(e.getMessage());
+            var badMessage = "{ \"message\" : \"Error: " + e.getMessage();
+            return new Gson().toJson(badMessage);
         }
     }
 
