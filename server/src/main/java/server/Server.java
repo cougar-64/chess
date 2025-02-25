@@ -94,6 +94,9 @@ public class Server {
             String authToken = req.headers("authorization");
             var info = new Gson().fromJson(req.body(), Map.class);
             String playerColor = (String) info.get("playerColor");
+            if (info.get("gameID") == null) {
+                throw new ResponseException(400, "Error: bad request");
+            }
             double gameIDDouble = (double) info.get("gameID");
             int gameID = (int) gameIDDouble;
             Service s = new Service(da);
