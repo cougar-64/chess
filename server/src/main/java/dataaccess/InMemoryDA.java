@@ -1,17 +1,15 @@
 package dataaccess;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.UUID;
-import java.util.ArrayList;
-import java.util.Random;
+import java.sql.Array;
+import java.util.*;
 
 import chess.ChessGame;
+import exception.ResponseException;
 import model.*;
+import spark.Response;
 
 public class InMemoryDA implements DataAccess {
     private final HashMap<String, UserData> user = new HashMap<>(); // takes username paired with UserData
-    private final HashMap<String, AuthData> auth = new HashMap<>(); // takes authToken paired with AuthData
+    private final HashMap<String, List<AuthData>> auth = new HashMap<>(); // takes authToken paired with AuthData
     private final HashMap<String, GameData> games = new HashMap<>(); // takes gameName paired with GameData
 
     public UserData getUser(String username) {
@@ -25,7 +23,9 @@ public class InMemoryDA implements DataAccess {
     public AuthData createAuth(String username) {
         String authToken = generateAuthToken();
         AuthData a = new AuthData(username, authToken);
-        auth.put(username, a);
+        List<AuthData> authList = auth.getOrDefault(username, new ArrayList<>());
+        authList.add(a);
+        auth.put(username, authList);
         return a;
     }
 
@@ -34,19 +34,24 @@ public class InMemoryDA implements DataAccess {
     }
 
     public AuthData getAuthData(String authentication) {
-        for (HashMap.Entry<String, AuthData> entry : auth.entrySet()) {
-            if (entry.getValue().authToken().equals(authentication)) {
-                return entry.getValue();
+        for (HashMap.Entry<String, List<AuthData>> entry : auth.entrySet()) {
+            for (AuthData authdata : entry.getValue()) {
+                if (authdata.authToken().equals(authentication)) {
+                    return authdata;
+                }
             }
         }
         return null;
     }
 
     public void deleteAuth(AuthData a) {
-        for (Iterator<HashMap.Entry<String, AuthData>> iterator = auth.entrySet().iterator(); iterator.hasNext(); ) {
-            Map.Entry<String, AuthData> entry = iterator.next();
-            if (entry.getValue().equals(a)) {
+        List<AuthData> authList = auth.get(a.username());
+        Iterator<AuthData> iterator = authList.iterator();
+        while (iterator.hasNext()) {
+            AuthData authData = iterator.next();
+            if (authData.authToken().equals(a.authToken())) {
                 iterator.remove();
+                break;
             }
         }
     }
@@ -62,7 +67,7 @@ public class InMemoryDA implements DataAccess {
     public GameData createGame(String gameName) {
         int gameID = createRandomInt();
         ChessGame game = new ChessGame();
-        GameData g = new GameData(gameID, null, null, gameName, game);
+        GameData g = new GameData(gameID, null, null, gameName, null);
         games.put(gameName, g);
         return g;
     }
