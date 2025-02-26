@@ -20,8 +20,8 @@ public class ServiceTests {
     private static Service serve;
     private static String wrongAuth;
 
-    @BeforeAll
-    public static void init() {
+    @BeforeEach
+    public void init() throws ResponseException {
         userForRegister = new UserData("existing", "existing", "existing@exist.com");
         user = new UserData("testUsername", "testPassword", "test@test.com");
         dataaccess = new InMemoryDA();
@@ -38,14 +38,13 @@ public class ServiceTests {
         dataaccess.addGame(game3);
         dataaccess.addGame(game2);
         dataaccess.addGame(game1);
-
         wrongAuth = "wrongAuthToken";
+        auth = serve.registerRequest(user);
     }
 
-    @BeforeEach
-    public void register() throws ResponseException {
-        auth = serve.registerRequest(user);
-
+    @AfterEach
+    public void clearAll() {
+        serve.deleteDataBase();
     }
 
     @Test
@@ -55,6 +54,7 @@ public class ServiceTests {
         Assertions.assertEquals("testToken", authForRegister.authToken());
         Assertions.assertEquals("existing", result.username(),
                 "Expected TestUsername but got " + result.username());
+
     }
 
     @Test
