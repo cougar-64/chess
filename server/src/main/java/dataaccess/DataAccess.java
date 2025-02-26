@@ -18,4 +18,5 @@ public interface DataAccess {
     void deleteUserDataBase();
     void deleteAuthDataBase();
     void deleteGameDataBase();
+    void addGame(GameData game);
 }

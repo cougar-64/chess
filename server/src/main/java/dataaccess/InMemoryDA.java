@@ -1,6 +1,7 @@
 package dataaccess;
 import java.util.*;
 import chess.ChessGame;
+import chess.PawnMoves;
 import model.*;
 
 public class InMemoryDA implements DataAccess {
@@ -127,6 +128,13 @@ public class InMemoryDA implements DataAccess {
         } while (true);
 
         return randInt;
+    }
+
+    public void addGame(GameData game) {
+        /**
+         * For testing purposes only!! Has no effect on the actual product
+         */
+        games.put(game.gameName(), game);
     }
 
 }
