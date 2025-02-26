@@ -5,9 +5,6 @@ import model.ListGamesResult;
 import model.UserData;
 import model.AuthData;
 import exception.ResponseException;
-import org.eclipse.jetty.server.Response;
-
-import java.util.ArrayList;
 
 public class Service {
     private final DataAccess dataaccess;
@@ -29,7 +26,6 @@ public class Service {
         }
         dataaccess.createUser(req);
         return dataaccess.createAuth(req.username());
-
     }
 
 
@@ -90,7 +86,7 @@ public class Service {
         dataaccess.updateGameData(playerColorSuccess, game, auth.username());
     }
 
-    public String getPlayerColor(String playerColor, GameData game) throws ResponseException {
+    public static String getPlayerColor(String playerColor, GameData game) throws ResponseException {
         /**
          * The purpose of this function is to handle the logic of checking if
          * the desired player color is already taken and throw exceptions for

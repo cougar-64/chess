@@ -1,11 +1,7 @@
 package dataaccess;
-import java.sql.Array;
 import java.util.*;
-
 import chess.ChessGame;
-import exception.ResponseException;
 import model.*;
-import spark.Response;
 
 public class InMemoryDA implements DataAccess {
     private final HashMap<String, UserData> user = new HashMap<>(); // takes username paired with UserData
@@ -66,7 +62,6 @@ public class InMemoryDA implements DataAccess {
 
     public GameData createGame(String gameName) {
         int gameID = createRandomInt();
-        ChessGame game = new ChessGame();
         GameData g = new GameData(gameID, null, null, gameName, null);
         games.put(gameName, g);
         return g;
