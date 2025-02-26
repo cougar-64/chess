@@ -49,7 +49,7 @@ public class ServiceTests {
 
     @Test
     @DisplayName("Successful Register")
-    public void RegisterSuccess() throws ResponseException {
+    public void registerSuccess() throws ResponseException {
         AuthData result = serve.registerRequest(userForRegister);
         Assertions.assertEquals("testToken", authForRegister.authToken());
         Assertions.assertEquals("existing", result.username(),
@@ -58,7 +58,7 @@ public class ServiceTests {
 
     @Test
     @DisplayName("Unsuccessful Register")
-    public void RegisterFailure() throws ResponseException {
+    public void registerFailure() throws ResponseException {
         UserData badUser = new UserData(null, null, null);
         Assertions.assertThrows(ResponseException.class, () ->
         {serve.registerRequest(badUser);});
@@ -66,7 +66,7 @@ public class ServiceTests {
 
     @Test
     @DisplayName("Successful Login")
-    public void LoginSuccess() throws ResponseException {
+    public void loginSuccess() throws ResponseException {
         AuthData result = serve.loginRequest(user);
         Assertions.assertEquals("testUsername", result.username(),
                 "expected testUsername but got " + result.username());
@@ -98,34 +98,34 @@ public class ServiceTests {
 
     @Test
     @DisplayName("Successful Game List")
-    public void GameListSuccess() throws ResponseException {
+    public void gameListSuccess() throws ResponseException {
         ListGamesResult result = serve.gameListRequest(auth.authToken());
         Assertions.assertEquals(listGames, result);
     }
 
     @Test
     @DisplayName("Unsuccessful Game List")
-    public void GameListFail() throws ResponseException {
+    public void gameListFail() throws ResponseException {
        Assertions.assertThrows(ResponseException.class, () ->
        {serve.gameListRequest("WrongAuth");});
     }
 
     @Test
     @DisplayName("Successful Create Game")
-    public void CreateGameSuccess() throws ResponseException {
+    public void createGameSuccess() throws ResponseException {
         GameData result = serve.createGameRequest(auth.authToken(), game1);
         Assertions.assertNotNull(result);
     }
 
     @Test
     @DisplayName("Unsuccessful Create Game")
-    public void CreateGameFail() throws ResponseException {
+    public void createGameFail() throws ResponseException {
         Assertions.assertThrows(ResponseException.class, () -> {serve.createGameRequest(wrongAuth, game1);});
     }
 
     @Test
     @DisplayName("Successful Join Game")
-    public void JoinGameSuccess() throws ResponseException {
+    public void joinGameSuccess() throws ResponseException {
         serve.joinGameRequest(auth.authToken(), "WHITE", 1234);
         Assertions.assertNotEquals(auth.username(), game1.whiteUsername());
     }
