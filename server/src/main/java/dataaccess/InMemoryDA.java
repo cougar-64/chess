@@ -1,10 +1,8 @@
 package dataaccess;
 import java.util.*;
-import chess.ChessGame;
-import chess.PawnMoves;
 import model.*;
 
-public class InMemoryDA implements DataAccess {
+public class InMemoryDA extends DatabaseManager implements DataAccess {
     private final HashMap<String, UserData> user = new HashMap<>(); // takes username paired with UserData
     private final HashMap<String, List<AuthData>> auth = new HashMap<>(); // takes authToken paired with AuthData
     private final HashMap<String, GameData> games = new HashMap<>(); // takes gameName paired with GameData
@@ -24,10 +22,6 @@ public class InMemoryDA implements DataAccess {
         authList.add(a);
         auth.put(username, authList);
         return a;
-    }
-
-    public static String generateAuthToken() {
-        return UUID.randomUUID().toString();
     }
 
     public AuthData getAuthData(String authentication) {

@@ -1,17 +1,20 @@
 package server;
 
 import model.*;
-import dataaccess.InMemoryDA;
 import spark.*;
 import com.google.gson.Gson;
 import java.util.Map;
 import service.Service;
 import exception.ResponseException;
+import dataaccess.*;
+
 
 public class Server {
-        InMemoryDA da = new InMemoryDA();
+//    InMemoryDA da = new InMemoryDA();
+    DataAccess da;
     public int run(int desiredPort) {
         Spark.port(desiredPort);
+        da = DatabaseManager.callCreate();
 
         Spark.staticFiles.location("web");
 

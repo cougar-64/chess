@@ -1,7 +1,12 @@
 package dataaccess;
 
+import exception.ResponseException;
+import model.GameData;
+
 import java.sql.*;
 import java.util.Properties;
+import java.util.Random;
+import java.util.UUID;
 
 public class DatabaseManager {
     private static final String DATABASE_NAME;
@@ -48,6 +53,19 @@ public class DatabaseManager {
         }
     }
 
+    public static DataAccess callCreate() {
+        try {
+            createDatabase();
+            mySQLDataBase da = new mySQLDataBase();
+            return da;
+        } catch (DataAccessException e) {
+            System.out.println("cannot connect to the database");
+            System.out.println("connecting to the in-memory database...");
+            InMemoryDA da = new InMemoryDA();
+            return da;
+        }
+    }
+
     /**
      * Create a connection to the database and sets the catalog based upon the
      * properties specified in db.properties. Connections to the database should
@@ -68,5 +86,25 @@ public class DatabaseManager {
         } catch (SQLException e) {
             throw new DataAccessException(e.getMessage());
         }
+    }
+
+    static String getDatabaseName() {
+        return DATABASE_NAME;
+    }
+
+    static String getUser() {
+        return USER;
+    }
+
+    static String getPassword() {
+        return PASSWORD;
+    }
+
+    static String getConnectionUrl() {
+        return CONNECTION_URL;
+    }
+
+    public String generateAuthToken() {
+        return UUID.randomUUID().toString();
     }
 }

@@ -1,0 +1,269 @@
+package dataaccess;
+import chess.ChessGame;
+import model.*;
+import org.mindrot.jbcrypt.BCrypt;
+
+import java.io.*;
+import java.util.*;
+import java.sql.*;
+
+public class mySQLDataBase extends DatabaseManager implements DataAccess {
+    public mySQLDataBase() {
+        createTables();
+    }
+
+    private static void createTables() {
+        /**
+         * this string creates the table for all the user data
+         * including username, email, and password
+         */
+        String createUserDataTable = """
+                CREATE TABLE IF NOT EXISTS userData (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                username VARCHAR(50) NOT NULL,
+                email VARCHAR(100) UNIQUE NOT NULL,
+                password VARCHAR(255) NOT NULl
+                )
+                """;
+        /**
+         * This string creates the table for a single authToken
+         */
+        String createAuthDataTable = """
+                CREATE TABLE IF NOT EXISTS authData (
+                auth_id INT AUTO_INCREMENT PRIMARY KEY,
+                auth_token VARCHAR(255) UNIQUE NOT NULl
+                )
+                """;
+        /**
+         * This string creates the table for joining
+         * a single username with multiple authTokens
+         */
+        String createJoinUserAuthTable = """
+                CREATE TABLE IF NOT EXISTS joinUserAuth (
+                user_id INT NOT NULL,
+                auth_id INT NOT NULL,
+                PRIMARY KEY (user_id, auth_id),
+                FOREIGN KEY (user_id) REFERENCES userData (id) ON DELETE CASCADE,
+                FOREIGN KEY (auth_id) REFERENCES authData (id) ON DELETE CASCADE
+                )
+                """;
+        /**
+         * This string creates the table for all gameData
+         */
+        String createGameDataTable = """
+                CREATE TABLE IF NOT EXISTS gameData (
+                game_id INT PRIMARY KEY,
+                white_username VARCHAR(50),
+                black_username VARCHAR(50),
+                game_name VARCHAR(50),
+                game BLOB NOT NULL
+                )
+                """;
+
+
+        try (Connection conn = DriverManager.getConnection(getConnectionUrl(), getUser(), getPassword());
+             Statement stmt = conn.createStatement()) {
+             stmt.execute(createUserDataTable);
+             stmt.execute(createAuthDataTable);
+             stmt.execute(createJoinUserAuthTable);
+             stmt.execute(createGameDataTable);
+        } catch (SQLException e) {
+            System.err.println(e.getMessage());
+
+        }
+    }
+
+    public UserData getUser(String username) {
+        String getUser = "SELECT username, email, password FROM userData WHERE username = ?";
+        try (Connection conn = DriverManager.getConnection(getConnectionUrl(), getUser(), getPassword());
+            PreparedStatement statement = conn.prepareStatement(getUser)) {
+            statement.setString(1, username);
+            ResultSet result = statement.executeQuery();
+            if (result.next()) {
+                return new UserData(
+                        result.getString("username"),
+                        result.getString("email"),
+                        result.getString("password")
+                );
+            }
+            return null;
+        } catch (SQLException e) {
+            System.err.println(e.getMessage());
+            return null;
+        }
+    }
+
+    public void createUser(UserData r) {
+        String insertUser = "INSERT INTO userData (username, email, password) VALUES (?, ?, ?)";
+        try (Connection conn = DriverManager.getConnection(getConnectionUrl(), getUser(), getPassword());
+            PreparedStatement statement = conn.prepareStatement(insertUser)) {
+            String hashedPassword = hashPassword(r.password());
+            statement.setString(1, r.username());
+            statement.setString(2, r.email());
+            statement.setString(3, hashedPassword);
+            int success = statement.executeUpdate();
+            didDatabaseExecute(success);
+        } catch (SQLException | DataAccessException e) {
+            System.err.println(e.getMessage());
+        }
+    }
+
+    private String hashPassword(String password) {
+        return BCrypt.hashpw(password, BCrypt.gensalt());
+    }
+
+    public AuthData createAuth(String username) {
+        String randomGeneratedAuth = generateAuthToken();
+        String insertAuth = "INSERT INTO authData (auth_token) VALUES (?)";
+        String getUserID = "SELECT id FROM userData WHERE username = ?";
+        try (Connection conn = DriverManager.getConnection(getConnectionUrl(), getUser(), getPassword());
+            PreparedStatement authStatement = conn.prepareStatement(insertAuth)) {
+            authStatement.setString(1, randomGeneratedAuth);
+            int authSuccess = authStatement.executeUpdate();
+            didDatabaseExecute(authSuccess);
+            ResultSet resultSet = authStatement.getGeneratedKeys();
+                 int authID = resultSet.getInt("auth_token");
+                 try (PreparedStatement userStatement = conn.prepareStatement(getUserID)) {
+                     userStatement.setString(1, username);
+                     ResultSet userResult = userStatement.executeQuery();
+                     int userID = userResult.getInt("id");
+                     insertJoinUserAuth(conn, userID, authID);
+                 }
+            return new AuthData(username, randomGeneratedAuth);
+        } catch (SQLException | DataAccessException e) {
+            System.err.println(e.getMessage());
+            return null;
+        }
+    }
+
+    private void insertJoinUserAuth(Connection conn, int userID, int authID) {
+        String insertJoin = "INSERT INTO joinUserAuth (user_id, auth_id) VALUES (?, ?)";
+        try (PreparedStatement joinStatement = conn.prepareStatement(insertJoin)) {
+            joinStatement.setInt(1, userID);
+            joinStatement.setInt(2, authID);
+            int joinSuccess = joinStatement.executeUpdate();
+            didDatabaseExecute(joinSuccess);
+        } catch (SQLException | DataAccessException e) {
+            System.err.println(e.getMessage());
+        }
+    }
+
+    public AuthData getAuthData(String auth) {
+        String getAuthToken = "SELECT auth_id FROM authData WHERE auth_token = ?";
+        String getAuthData = """
+        SELECT u.username, a.auth_token FROM joinUserAuth j
+        JOIN userData u ON j.user_id = u.id
+        JOIN authData a ON j.auth_id = a.auth_id
+        WHERE j.auth_id = ?
+    """;
+        try (Connection conn = DriverManager.getConnection(getConnectionUrl(), getUser(), getPassword());
+            PreparedStatement authTokenStatement = conn.prepareStatement(getAuthToken)) {
+            authTokenStatement.setString(1, auth);
+            ResultSet authTokens = authTokenStatement.executeQuery();
+            if (!authTokens.next()) {
+                return null;
+            }
+            int authID = authTokens.getInt("auth_id");
+            try (PreparedStatement authDataStatement = conn.prepareStatement(getAuthData)) {
+                authDataStatement.setInt(1, authID);
+                ResultSet authData = authDataStatement.executeQuery();
+                if (authData.next()) {
+                return new AuthData(
+                        authData.getString("username"),
+                        authData.getString("auth_token")
+                );
+                }
+            }
+            throw new DataAccessException("Unable to retrieve the authData!");
+        } catch (SQLException | DataAccessException e) {
+            System.err.println(e.getMessage());
+            return null;
+        }
+    }
+
+    public void deleteAuth(AuthData a) {
+        String getAuth = "SELECT auth_id FROM authData WHERE auth_token = ?";
+        String removeAuth = "DELETE FROM joinUserAuth WHERE auth_id = ?";
+        try (Connection conn = DriverManager.getConnection(getConnectionUrl(), getUser(), getPassword());
+        PreparedStatement authStatement = conn.prepareStatement(getAuth)) {
+            authStatement.setString(1, a.authToken());
+            ResultSet authSet = authStatement.executeQuery();
+            if (! authSet.next()) {
+                throw new DataAccessException("Provided authToken does not exist!");
+            }
+            int authID = authSet.getInt("auth_id");
+            try (PreparedStatement removeStatement = conn.prepareStatement(removeAuth)) {
+                removeStatement.setInt(1, authID);
+                int removed = removeStatement.executeUpdate();
+                didDatabaseExecute(removed);
+            }
+        } catch (SQLException | DataAccessException e) {
+            System.err.println(e.getMessage());
+        }
+    }
+
+    public ArrayList<GameData> listGames() {
+        String getGameList = "SELECT * FROM gameData";
+        ArrayList<GameData> gameDataList = new ArrayList<>();
+        try (Connection conn = DriverManager.getConnection(getConnectionUrl(), getUser(), getPassword());
+            PreparedStatement getGame = conn.prepareStatement(getGameList)) {
+            ResultSet gameSet = getGame.executeQuery();
+            while (gameSet.next()) {
+                ChessGame game = deserializeGame(gameSet.getBytes("game"));
+                GameData newGame = new GameData(
+                        gameSet.getInt("id"),
+                        gameSet.getString("white_username"),
+                        gameSet.getString("black_username"),
+                        gameSet.getString("game_name"),
+                        game
+                );
+                gameDataList.add(newGame);
+            }
+            return gameDataList;
+    } catch (SQLException e) {
+            System.err.println(e.getMessage());
+            return null;
+        }
+    }
+
+    private static ChessGame deserializeGame(byte[] gameBytes) {
+        if (gameBytes == null) return null;
+        try (ByteArrayInputStream bis = new ByteArrayInputStream(gameBytes);
+             ObjectInputStream ois = new ObjectInputStream(bis)) {
+            return (ChessGame) ois.readObject();
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public GameData createGame(String gameName) {
+        int randInt = generateRandomInt();
+        String createGame = """
+                INSERT INTO gameData (game_id, white_username,
+                black_username, game_name, game)
+                VALUES = (?, ?, ?, ?, ?)"""
+    }
+
+    private Integer generateRandomInt() {
+        String isIntInGameData = "SELECT * FROM gameData WHERE game_id = ?";
+        Random random = new Random();
+        try (Connection conn = DriverManager.getConnection(getConnectionUrl(), getUser(), getPassword());
+            PreparedStatement getGameData = conn.prepareStatement(isIntInGameData)) {
+            while (true) {
+                int randInt = 1000 + random.nextInt();
+                getGameData.setInt(1, randInt);
+                return randInt;
+            }
+        } catch (SQLException e) {
+            System.err.println(e.getMessage());
+            return -1;
+        }
+    }
+
+    private void didDatabaseExecute(int success) throws DataAccessException {
+        if (success == 0) {
+            throw new DataAccessException("insert/update/delete failed");
+        }
+    }
+}
