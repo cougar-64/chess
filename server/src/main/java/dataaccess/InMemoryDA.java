@@ -71,7 +71,7 @@ public class InMemoryDA extends DatabaseManager implements DataAccess {
         return null;
     }
 
-    public void deleteGameDuringUpdate(int gameID) {
+    private void deleteGameDuringUpdate(int gameID) {
         for (Iterator<HashMap.Entry<String, GameData>> iterator = games.entrySet().iterator(); iterator.hasNext(); ) {
             Map.Entry<String, GameData> entry = iterator.next();
             if (entry.getValue().gameID() == (gameID)) {
@@ -104,7 +104,7 @@ public class InMemoryDA extends DatabaseManager implements DataAccess {
         games.clear();
     }
 
-    public int createRandomInt() {
+    private int createRandomInt() {
         Random random = new Random();
         int randInt;
         do {

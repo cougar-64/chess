@@ -10,10 +10,8 @@ public interface DataAccess {
     void deleteAuth(AuthData a);
     ArrayList<GameData> listGames();
     GameData createGame(String gameName);
-    int createRandomInt();
     GameData getGame(int gameID);
     void updateGameData(String playerColor, GameData game, String username);
-    void deleteGameDuringUpdate(int gameID);
     void deleteUserDataBase();
     void deleteAuthDataBase();
     void deleteGameDataBase();

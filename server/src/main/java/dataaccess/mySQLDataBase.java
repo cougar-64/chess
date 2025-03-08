@@ -3,6 +3,7 @@ import chess.ChessGame;
 import model.*;
 import org.mindrot.jbcrypt.BCrypt;
 
+import javax.xml.crypto.Data;
 import java.io.*;
 import java.util.*;
 import java.sql.*;
@@ -86,8 +87,8 @@ public class mySQLDataBase extends DatabaseManager implements DataAccess {
                         result.getString("password")
                 );
             }
-            return null;
-        } catch (SQLException e) {
+            throw new DataAccessException("Error: Could not find user_data with username " + username);
+        } catch (SQLException | DataAccessException e) {
             System.err.println(e.getMessage());
             return null;
         }
@@ -161,7 +162,7 @@ public class mySQLDataBase extends DatabaseManager implements DataAccess {
             authTokenStatement.setString(1, auth);
             ResultSet authTokens = authTokenStatement.executeQuery();
             if (!authTokens.next()) {
-                return null;
+                throw new DataAccessException("auth_data does not exist for auth_token" + auth);
             }
             int authID = authTokens.getInt("auth_id");
             try (PreparedStatement authDataStatement = conn.prepareStatement(getAuthData)) {
@@ -242,7 +243,22 @@ public class mySQLDataBase extends DatabaseManager implements DataAccess {
         String createGame = """
                 INSERT INTO gameData (game_id, white_username,
                 black_username, game_name, game)
-                VALUES = (?, ?, ?, ?, ?)"""
+                VALUES = (?, ?, ?, ?, ?)""";
+        ChessGame chessGame = new ChessGame();
+        try (Connection conn = DriverManager.getConnection(getConnectionUrl(), getUser(), getPassword());
+            PreparedStatement game = conn.prepareStatement(createGame)) {
+            game.setInt(1, randInt);
+            game.setString(2, null);
+            game.setString(3, null);
+            game.setString(4, gameName);
+            game.setObject(5, chessGame);
+            int inserted = game.executeUpdate();
+            didDatabaseExecute(inserted);
+            return new GameData(randInt, null, null, gameName, chessGame);
+        } catch (SQLException | DataAccessException e) {
+            System.err.println(e.getMessage());
+            return null;
+        }
     }
 
     private Integer generateRandomInt() {
@@ -258,6 +274,109 @@ public class mySQLDataBase extends DatabaseManager implements DataAccess {
         } catch (SQLException e) {
             System.err.println(e.getMessage());
             return -1;
+        }
+    }
+
+    public GameData getGame(int gameID) {
+        String getGame = "SELECT FROM GameData WHERE game_id = ?";
+        try (Connection conn = DriverManager.getConnection(getConnectionUrl(), getUser(), getPassword());
+            PreparedStatement gameStatement = conn.prepareStatement(getGame)) {
+            gameStatement.setInt(1,gameID);
+            ResultSet gameResult = gameStatement.executeQuery();
+            if (gameResult.next()) {
+                ChessGame game = deserializeGame(gameResult.getBytes("game"));
+                return new GameData(
+                        gameID,
+                        gameResult.getString("white_username"),
+                        gameResult.getString("black_username"),
+                        gameResult.getString("game_name"),
+                        game
+                );
+            }
+            throw new DataAccessException("Error: Could not find the game with game_id " + gameID);
+        } catch (SQLException | DataAccessException e) {
+            System.err.println(e.getMessage());
+            return null;
+        }
+    }
+
+    public void updateGameData(String playerColor, GameData game, String username) {
+        String selectGame = "SELECT FROM gameData WHERE user_id = ?";
+        String insertWhiteUser = """
+                INSERT INTO gameData (white_username) VALUES (?)
+                """;
+        String insertBlackUser = """
+                INSERT INTO gameData (black_username) VALUES (?)
+                """;
+        try (Connection conn = DriverManager.getConnection(getConnectionUrl(), getUser(), getPassword());
+            PreparedStatement selectStatement = conn.prepareStatement(selectGame)) {
+            selectStatement.setInt(1, game.gameID());
+            ResultSet selectResult = selectStatement.executeQuery();
+            if (selectResult.next()) {
+                if (playerColor.equals("WHITE")) {
+                    PreparedStatement insertWhite = conn.prepareStatement(insertWhiteUser);
+                    insertWhite.setString(1, username);
+                    int whiteSuccess = insertWhite.executeUpdate();
+                    didDatabaseExecute(whiteSuccess);
+                }
+                else {
+                    PreparedStatement insertBlack = conn.prepareStatement(insertBlackUser);
+                    insertBlack.setString(1, username);
+                    int blackSuccess = insertBlack.executeUpdate();
+                    didDatabaseExecute(blackSuccess);
+                }
+            }
+        } catch (SQLException | DataAccessException e) {
+            System.err.println(e.getMessage());
+        }
+    }
+
+    public void deleteUserDataBase() {
+        String drop = "DROP TABLE userData";
+        try (Connection conn = DriverManager.getConnection(getConnectionUrl(), getUser(), getPassword());
+            PreparedStatement deleteStatement = conn.prepareStatement(drop)) {
+            deleteStatement.executeUpdate();
+        } catch (SQLException e) {
+            System.err.println(e.getMessage());
+        }
+    }
+
+    public void deleteAuthDataBase() {
+        String drop = "DROP TABLE authData";
+        try (Connection conn = DriverManager.getConnection(getConnectionUrl(), getUser(), getPassword());
+             PreparedStatement deleteStatement = conn.prepareStatement(drop)) {
+            deleteStatement.executeUpdate();
+        } catch (SQLException e) {
+            System.err.println(e.getMessage());
+        }
+    }
+
+    public void deleteGameDataBase() {
+        String drop = "DROP TABLE gameData";
+        try (Connection conn = DriverManager.getConnection(getConnectionUrl(), getUser(), getPassword());
+             PreparedStatement deleteStatement = conn.prepareStatement(drop)) {
+            deleteStatement.executeUpdate();
+        } catch (SQLException e) {
+            System.err.println(e.getMessage());
+        }
+    }
+
+    public void addGame(GameData existingGame) {
+        String createGame = """
+                INSERT INTO gameData (game_id, white_username,
+                black_username, game_name, game)
+                VALUES = (?, ?, ?, ?, ?)""";
+        try (Connection conn = DriverManager.getConnection(getConnectionUrl(), getUser(), getPassword());
+             PreparedStatement game = conn.prepareStatement(createGame)) {
+            game.setInt(1, existingGame.gameID());
+            game.setString(2, existingGame.whiteUsername());
+            game.setString(3, existingGame.blackUsername());
+            game.setString(4, existingGame.gameName());
+            game.setObject(5, existingGame.game());
+            int inserted = game.executeUpdate();
+            didDatabaseExecute(inserted);
+        } catch (SQLException | DataAccessException e) {
+            System.err.println(e.getMessage());
         }
     }
 
