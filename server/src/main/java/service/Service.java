@@ -113,8 +113,6 @@ public class Service {
     }
 
     public void deleteDataBase() {
-        dataaccess.deleteUserDataBase();
-        dataaccess.deleteAuthDataBase();
-        dataaccess.deleteGameDataBase();
+        dataaccess.deleteFullDataBase();
     }
 }

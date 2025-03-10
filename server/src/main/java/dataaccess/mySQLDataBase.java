@@ -3,7 +3,6 @@ import chess.ChessGame;
 import model.*;
 import org.mindrot.jbcrypt.BCrypt;
 
-import javax.xml.crypto.Data;
 import java.io.*;
 import java.util.*;
 import java.sql.*;
@@ -45,7 +44,7 @@ public class mySQLDataBase extends DatabaseManager implements DataAccess {
                 auth_id INT NOT NULL,
                 PRIMARY KEY (user_id, auth_id),
                 FOREIGN KEY (user_id) REFERENCES userData (id) ON DELETE CASCADE,
-                FOREIGN KEY (auth_id) REFERENCES authData (id) ON DELETE CASCADE
+                FOREIGN KEY (auth_id) REFERENCES authData (auth_id) ON DELETE CASCADE
                 )
                 """;
         /**
@@ -62,13 +61,13 @@ public class mySQLDataBase extends DatabaseManager implements DataAccess {
                 """;
 
 
-        try (Connection conn = DriverManager.getConnection(getConnectionUrl(), getUser(), getPassword());
+        try (Connection conn = DatabaseManager.getConnection();
              Statement stmt = conn.createStatement()) {
              stmt.execute(createUserDataTable);
              stmt.execute(createAuthDataTable);
              stmt.execute(createJoinUserAuthTable);
              stmt.execute(createGameDataTable);
-        } catch (SQLException e) {
+        } catch (SQLException | DataAccessException e) {
             System.err.println(e.getMessage());
 
         }
@@ -76,15 +75,15 @@ public class mySQLDataBase extends DatabaseManager implements DataAccess {
 
     public UserData getUser(String username) {
         String getUser = "SELECT username, email, password FROM userData WHERE username = ?";
-        try (Connection conn = DriverManager.getConnection(getConnectionUrl(), getUser(), getPassword());
+    try (Connection conn = DatabaseManager.getConnection();
             PreparedStatement statement = conn.prepareStatement(getUser)) {
             statement.setString(1, username);
             ResultSet result = statement.executeQuery();
             if (result.next()) {
                 return new UserData(
                         result.getString("username"),
-                        result.getString("email"),
-                        result.getString("password")
+                        result.getString("password"),
+                        result.getString("email")
                 );
             }
             throw new DataAccessException("Error: Could not find user_data with username " + username);
@@ -96,7 +95,7 @@ public class mySQLDataBase extends DatabaseManager implements DataAccess {
 
     public void createUser(UserData r) {
         String insertUser = "INSERT INTO userData (username, email, password) VALUES (?, ?, ?)";
-        try (Connection conn = DriverManager.getConnection(getConnectionUrl(), getUser(), getPassword());
+        try (Connection conn = DatabaseManager.getConnection();
             PreparedStatement statement = conn.prepareStatement(insertUser)) {
             String hashedPassword = hashPassword(r.password());
             statement.setString(1, r.username());
@@ -113,24 +112,37 @@ public class mySQLDataBase extends DatabaseManager implements DataAccess {
         return BCrypt.hashpw(password, BCrypt.gensalt());
     }
 
+    private Boolean unHashedPassword(String password) {
+        String hashed = hashPassword(password);
+        return BCrypt.checkpw(password, hashed);
+    }
+
     public AuthData createAuth(String username) {
         String randomGeneratedAuth = generateAuthToken();
         String insertAuth = "INSERT INTO authData (auth_token) VALUES (?)";
+        String queryAuth = "SELECT * FROM authData WHERE auth_token = ?";
         String getUserID = "SELECT id FROM userData WHERE username = ?";
-        try (Connection conn = DriverManager.getConnection(getConnectionUrl(), getUser(), getPassword());
+        try (Connection conn = DatabaseManager.getConnection();
             PreparedStatement authStatement = conn.prepareStatement(insertAuth)) {
             authStatement.setString(1, randomGeneratedAuth);
             int authSuccess = authStatement.executeUpdate();
             didDatabaseExecute(authSuccess);
-            ResultSet resultSet = authStatement.getGeneratedKeys();
-                 int authID = resultSet.getInt("auth_token");
+            PreparedStatement queryStatement = conn.prepareStatement(queryAuth);
+            queryStatement.setString(1, randomGeneratedAuth);
+            ResultSet resultSet = queryStatement.executeQuery();
+            if (resultSet.next()) {
+                int authID = resultSet.getInt("auth_id");
                  try (PreparedStatement userStatement = conn.prepareStatement(getUserID)) {
                      userStatement.setString(1, username);
                      ResultSet userResult = userStatement.executeQuery();
-                     int userID = userResult.getInt("id");
-                     insertJoinUserAuth(conn, userID, authID);
+                     if (userResult.next()) {
+                         int userID = userResult.getInt("id");
+                         insertJoinUserAuth(conn, userID, authID);
+                         return new AuthData(username, randomGeneratedAuth);
+                     }
                  }
-            return new AuthData(username, randomGeneratedAuth);
+                 }
+            throw new DataAccessException("user does not exist!");
         } catch (SQLException | DataAccessException e) {
             System.err.println(e.getMessage());
             return null;
@@ -157,7 +169,7 @@ public class mySQLDataBase extends DatabaseManager implements DataAccess {
         JOIN authData a ON j.auth_id = a.auth_id
         WHERE j.auth_id = ?
     """;
-        try (Connection conn = DriverManager.getConnection(getConnectionUrl(), getUser(), getPassword());
+        try (Connection conn = DatabaseManager.getConnection();
             PreparedStatement authTokenStatement = conn.prepareStatement(getAuthToken)) {
             authTokenStatement.setString(1, auth);
             ResultSet authTokens = authTokenStatement.executeQuery();
@@ -185,7 +197,7 @@ public class mySQLDataBase extends DatabaseManager implements DataAccess {
     public void deleteAuth(AuthData a) {
         String getAuth = "SELECT auth_id FROM authData WHERE auth_token = ?";
         String removeAuth = "DELETE FROM joinUserAuth WHERE auth_id = ?";
-        try (Connection conn = DriverManager.getConnection(getConnectionUrl(), getUser(), getPassword());
+        try (Connection conn = DatabaseManager.getConnection();
         PreparedStatement authStatement = conn.prepareStatement(getAuth)) {
             authStatement.setString(1, a.authToken());
             ResultSet authSet = authStatement.executeQuery();
@@ -206,7 +218,7 @@ public class mySQLDataBase extends DatabaseManager implements DataAccess {
     public ArrayList<GameData> listGames() {
         String getGameList = "SELECT * FROM gameData";
         ArrayList<GameData> gameDataList = new ArrayList<>();
-        try (Connection conn = DriverManager.getConnection(getConnectionUrl(), getUser(), getPassword());
+        try (Connection conn = DatabaseManager.getConnection();
             PreparedStatement getGame = conn.prepareStatement(getGameList)) {
             ResultSet gameSet = getGame.executeQuery();
             while (gameSet.next()) {
@@ -221,7 +233,7 @@ public class mySQLDataBase extends DatabaseManager implements DataAccess {
                 gameDataList.add(newGame);
             }
             return gameDataList;
-    } catch (SQLException e) {
+    } catch (SQLException | DataAccessException e) {
             System.err.println(e.getMessage());
             return null;
         }
@@ -245,7 +257,7 @@ public class mySQLDataBase extends DatabaseManager implements DataAccess {
                 black_username, game_name, game)
                 VALUES = (?, ?, ?, ?, ?)""";
         ChessGame chessGame = new ChessGame();
-        try (Connection conn = DriverManager.getConnection(getConnectionUrl(), getUser(), getPassword());
+        try (Connection conn = DatabaseManager.getConnection();
             PreparedStatement game = conn.prepareStatement(createGame)) {
             game.setInt(1, randInt);
             game.setString(2, null);
@@ -264,14 +276,14 @@ public class mySQLDataBase extends DatabaseManager implements DataAccess {
     private Integer generateRandomInt() {
         String isIntInGameData = "SELECT * FROM gameData WHERE game_id = ?";
         Random random = new Random();
-        try (Connection conn = DriverManager.getConnection(getConnectionUrl(), getUser(), getPassword());
+        try (Connection conn = DatabaseManager.getConnection();
             PreparedStatement getGameData = conn.prepareStatement(isIntInGameData)) {
             while (true) {
                 int randInt = 1000 + random.nextInt();
                 getGameData.setInt(1, randInt);
                 return randInt;
             }
-        } catch (SQLException e) {
+        } catch (SQLException | DataAccessException e) {
             System.err.println(e.getMessage());
             return -1;
         }
@@ -279,7 +291,7 @@ public class mySQLDataBase extends DatabaseManager implements DataAccess {
 
     public GameData getGame(int gameID) {
         String getGame = "SELECT FROM GameData WHERE game_id = ?";
-        try (Connection conn = DriverManager.getConnection(getConnectionUrl(), getUser(), getPassword());
+        try (Connection conn = DatabaseManager.getConnection();
             PreparedStatement gameStatement = conn.prepareStatement(getGame)) {
             gameStatement.setInt(1,gameID);
             ResultSet gameResult = gameStatement.executeQuery();
@@ -308,7 +320,7 @@ public class mySQLDataBase extends DatabaseManager implements DataAccess {
         String insertBlackUser = """
                 INSERT INTO gameData (black_username) VALUES (?)
                 """;
-        try (Connection conn = DriverManager.getConnection(getConnectionUrl(), getUser(), getPassword());
+        try (Connection conn = DatabaseManager.getConnection();
             PreparedStatement selectStatement = conn.prepareStatement(selectGame)) {
             selectStatement.setInt(1, game.gameID());
             ResultSet selectResult = selectStatement.executeQuery();
@@ -331,31 +343,39 @@ public class mySQLDataBase extends DatabaseManager implements DataAccess {
         }
     }
 
-    public void deleteUserDataBase() {
-        String drop = "DROP TABLE userData";
-        try (Connection conn = DriverManager.getConnection(getConnectionUrl(), getUser(), getPassword());
-            PreparedStatement deleteStatement = conn.prepareStatement(drop)) {
-            deleteStatement.executeUpdate();
-        } catch (SQLException e) {
+    public void deleteFullDataBase() {
+        String dropUser = "DROP TABLE userData";
+        String dropAuth = "DROP TABLE authData";
+        String dropGame = "DROP TABLE gameData";
+        try (Connection conn = DatabaseManager.getConnection()) {
+            disableFK(conn);
+            PreparedStatement userStatement = conn.prepareStatement(dropUser);
+            userStatement.executeUpdate();
+            PreparedStatement authStatement = conn.prepareStatement(dropAuth);
+            authStatement.executeUpdate();
+            PreparedStatement gameStatement = conn.prepareStatement(dropGame);
+            gameStatement.executeUpdate();
+            enableFK(conn);
+        } catch (SQLException |DataAccessException e) {
             System.err.println(e.getMessage());
         }
     }
 
-    public void deleteAuthDataBase() {
-        String drop = "DROP TABLE authData";
-        try (Connection conn = DriverManager.getConnection(getConnectionUrl(), getUser(), getPassword());
-             PreparedStatement deleteStatement = conn.prepareStatement(drop)) {
-            deleteStatement.executeUpdate();
-        } catch (SQLException e) {
+    private void disableFK(Connection conn) {
+        String disable = "SET FOREIGN_KEY_CHECKS = 0";
+        try {
+            PreparedStatement disabledStatement = conn.prepareStatement(disable);
+            disabledStatement.executeUpdate();
+    } catch (SQLException e) {
             System.err.println(e.getMessage());
         }
     }
 
-    public void deleteGameDataBase() {
-        String drop = "DROP TABLE gameData";
-        try (Connection conn = DriverManager.getConnection(getConnectionUrl(), getUser(), getPassword());
-             PreparedStatement deleteStatement = conn.prepareStatement(drop)) {
-            deleteStatement.executeUpdate();
+    private void enableFK(Connection conn) {
+        String enable = "SET FOREIGN_KEY_CHECKS = 1";
+        try {
+            PreparedStatement enabledStatement = conn.prepareStatement(enable);
+            enabledStatement.executeUpdate();
         } catch (SQLException e) {
             System.err.println(e.getMessage());
         }
@@ -366,7 +386,7 @@ public class mySQLDataBase extends DatabaseManager implements DataAccess {
                 INSERT INTO gameData (game_id, white_username,
                 black_username, game_name, game)
                 VALUES = (?, ?, ?, ?, ?)""";
-        try (Connection conn = DriverManager.getConnection(getConnectionUrl(), getUser(), getPassword());
+        try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement game = conn.prepareStatement(createGame)) {
             game.setInt(1, existingGame.gameID());
             game.setString(2, existingGame.whiteUsername());

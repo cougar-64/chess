@@ -1,5 +1,7 @@
 package dataaccess;
 import java.util.*;
+
+import chess.ChessPiece;
 import model.*;
 
 public class InMemoryDA extends DatabaseManager implements DataAccess {
@@ -92,15 +94,9 @@ public class InMemoryDA extends DatabaseManager implements DataAccess {
         games.put(game.gameName(), newGame);
     }
 
-    public void deleteUserDataBase() {
+    public void deleteFullDataBase() {
         user.clear();
-    }
-
-    public void deleteAuthDataBase() {
         auth.clear();
-    }
-
-    public void deleteGameDataBase() {
         games.clear();
     }
 
