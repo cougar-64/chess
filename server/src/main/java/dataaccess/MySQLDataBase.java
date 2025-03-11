@@ -231,7 +231,9 @@ public class MySQLDataBase extends DatabaseManager implements DataAccess {
     }
 
     private static ChessGame deserializeGame(byte[] gameBytes) {
-        if (gameBytes == null) return null;
+        if (gameBytes == null) {
+            return null;
+        }
         try (ByteArrayInputStream bis = new ByteArrayInputStream(gameBytes);
              ObjectInputStream ois = new ObjectInputStream(bis)) {
             return (ChessGame) ois.readObject();
@@ -242,7 +244,9 @@ public class MySQLDataBase extends DatabaseManager implements DataAccess {
     }
 
     private static byte[] serializeGame(ChessGame game) {
-        if (game == null) return null;
+        if (game == null) {
+            return null;
+        }
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream();
              ObjectOutputStream oos = new ObjectOutputStream(bos)) {
             oos.writeObject(game);  // Serialize the ChessGame object
