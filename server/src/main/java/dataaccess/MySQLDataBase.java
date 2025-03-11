@@ -295,7 +295,7 @@ public class MySQLDataBase extends DatabaseManager implements DataAccess {
     }
 
     public GameData getGame(int gameID) {
-        String getGame = "SELECT * FROM GameData WHERE game_id = ?";
+        String getGame = "SELECT * FROM gameData WHERE game_id = ?";
         try (Connection conn = DatabaseManager.getConnection();
             PreparedStatement gameStatement = conn.prepareStatement(getGame)) {
             gameStatement.setInt(1,gameID);
