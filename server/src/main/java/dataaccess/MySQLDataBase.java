@@ -337,12 +337,15 @@ public class MySQLDataBase extends DatabaseManager implements DataAccess {
                     int whiteSuccess = insertWhite.executeUpdate();
                     didDatabaseExecute(whiteSuccess);
                 }
-                else {
+                else if (playerColor.equals("BLACK")) {
                     PreparedStatement insertBlack = conn.prepareStatement(insertBlackUser);
                     insertBlack.setString(1, username);
                     insertBlack.setInt(2, game.gameID());
                     int blackSuccess = insertBlack.executeUpdate();
                     didDatabaseExecute(blackSuccess);
+                }
+                else {
+                    throw new DataAccessException("invalid color!");
                 }
             }
         } catch (SQLException | DataAccessException e) {

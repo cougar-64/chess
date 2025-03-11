@@ -149,16 +149,74 @@ public class SQLDataBaseTests {
     @DisplayName("list games success")
     public void listGamesSuccess() {
         sqlDB.createUser(r);
-        GameData g = sqlDB.createGame("testGame");
-        GameData a = sqlDB.getGame(g.gameID());
-        assertNotNull(a);
+        sqlDB.createGame("testGame1");
+        sqlDB.createGame("testGame2");
+        ArrayList<GameData> g = sqlDB.listGames();
+        assertNotNull(g);
+
     }
 
     @Test
     @DisplayName("list game fail")
     public void listGamesFail() {
         sqlDB.createUser(r);
+        ArrayList<GameData> a = sqlDB.listGames();
+        assertTrue(a.isEmpty());
+    }
+
+    @Test
+    @DisplayName("Create game success")
+    public void createGameSuccess() {
+        sqlDB.createUser(r);
+        GameData g = sqlDB.createGame("testGame");
+        GameData a = sqlDB.getGame(g.gameID());
+        assertNotNull(a);
+    }
+
+    @Test
+    @DisplayName("Create game fail")
+    public void createGameFail() {
+        sqlDB.createUser(r);
         GameData a = sqlDB.getGame(1);
         assertNull(a);
+    }
+
+    @Test
+    @DisplayName("Update game success")
+    public void updateGameSuccess() {
+        sqlDB.createUser(r);
+        GameData g = sqlDB.createGame("testGame");
+        sqlDB.updateGameData("BLACK", g, r.username());
+        GameData a = sqlDB.getGame(g.gameID());
+        assertEquals(a.blackUsername(), r.username());
+    }
+
+    @Test
+    @DisplayName("Update game fail")
+    public void updateGameFail() {
+        sqlDB.createUser(r);
+        GameData g = sqlDB.createGame("testGame");
+        sqlDB.updateGameData("GREEN", g, r.username());
+        GameData a = sqlDB.getGame(g.gameID());
+        assertNotEquals(a.blackUsername(), r.username());
+    }
+
+    @Test
+    @DisplayName("Delete full database success")
+    public void deleteDBSuccess() {
+        sqlDB.createUser(r);
+        GameData g = sqlDB.createGame("testGame");
+        sqlDB.deleteFullDataBase();
+        GameData a = sqlDB.getGame(g.gameID());
+        assertNull(a);
+    }
+
+    @Test
+    @DisplayName("Delete full database fail")
+    public void deleteDBFail() {
+        sqlDB.createUser(r);
+        GameData a = sqlDB.createGame("testGame");
+        GameData g = sqlDB.getGame(a.gameID());
+        assertNotNull(g);
     }
 }
