@@ -11,6 +11,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class SQLDataBaseTests {
     private static MySQLDataBase sqlDB;
     UserData r = new UserData("testUser", "testPassword", "test@test.com");
+
     @BeforeEach
     public void init() {
         DatabaseManager.callCreate();
@@ -111,6 +112,40 @@ public class SQLDataBaseTests {
         AuthData a = sqlDB.createAuth(r.username());
         AuthData b = sqlDB.getAuthData(a.authToken());
 
-        assertEquals(b,a);
+        assertEquals(b, a);
+    }
+
+    @Test
+    @DisplayName("Failed get auth")
+    public void getAuthFail() {
+        sqlDB.createUser(r);
+        AuthData correctUser = sqlDB.createAuth(r.username());
+        AuthData incorrect = sqlDB.getAuthData("Wrong auth");
+        assertNotEquals(correctUser, incorrect);
+    }
+
+    @Test
+    @DisplayName("Successful delete auth")
+    public void deleteAuthSuccess() {
+        sqlDB.createUser(r);
+        AuthData a = sqlDB.createAuth(r.username());
+        sqlDB.deleteAuth(a);
+        AuthData shouldBeNull = sqlDB.getAuthData(a.authToken());
+        assertNull(shouldBeNull);
+    }
+
+    @Test
+    @DisplayName("Failed delete auth")
+    public void deleteAuthFail() {
+        sqlDB.createUser(r);
+        AuthData a = sqlDB.createAuth(r.username());
+        AuthData b = sqlDB.getAuthData(a.authToken());
+        assertNotNull(b);
+    }
+
+    @Test
+    @DisplayName("list games success")
+    public void listGamesSuccess() {
+
     }
 }
