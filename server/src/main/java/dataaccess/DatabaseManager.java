@@ -86,22 +86,6 @@ public class DatabaseManager {
         }
     }
 
-//    static String getDatabaseName() {
-//        return DATABASE_NAME;
-//    }
-//
-//    static String getUser() {
-//        return USER;
-//    }
-//
-//    static String getPassword() {
-//        return PASSWORD;
-//    }
-//
-//    static String getConnectionUrl() {
-//        return CONNECTION_URL;
-//    }
-
     public String generateAuthToken() {
         return UUID.randomUUID().toString();
     }

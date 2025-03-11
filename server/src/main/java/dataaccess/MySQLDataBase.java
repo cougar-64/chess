@@ -112,11 +112,6 @@ public class MySQLDataBase extends DatabaseManager implements DataAccess {
         return BCrypt.hashpw(password, BCrypt.gensalt());
     }
 
-    private Boolean unHashedPassword(String password) {
-        String hashed = hashPassword(password);
-        return BCrypt.checkpw(password, hashed);
-    }
-
     public AuthData createAuth(String username) {
         String randomGeneratedAuth = generateAuthToken();
         String insertAuth = "INSERT INTO authData (auth_token) VALUES (?)";
