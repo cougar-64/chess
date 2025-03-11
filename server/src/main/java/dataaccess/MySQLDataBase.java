@@ -7,8 +7,8 @@ import java.io.*;
 import java.util.*;
 import java.sql.*;
 
-public class mySQLDataBase extends DatabaseManager implements DataAccess {
-    public mySQLDataBase() {
+public class MySQLDataBase extends DatabaseManager implements DataAccess {
+    public MySQLDataBase() {
         createTables();
     }
 

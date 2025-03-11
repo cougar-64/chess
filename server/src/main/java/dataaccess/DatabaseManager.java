@@ -1,11 +1,7 @@
 package dataaccess;
 
-import exception.ResponseException;
-import model.GameData;
-
 import java.sql.*;
 import java.util.Properties;
-import java.util.Random;
 import java.util.UUID;
 
 public class DatabaseManager {
@@ -58,7 +54,7 @@ public class DatabaseManager {
     public static DataAccess callCreate() {
         try {
             createDatabase();
-            mySQLDataBase da = new mySQLDataBase();
+            MySQLDataBase da = new MySQLDataBase();
             return da;
         } catch (DataAccessException e) {
             System.out.println("cannot connect to the database");

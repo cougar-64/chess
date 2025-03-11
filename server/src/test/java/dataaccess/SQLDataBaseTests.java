@@ -2,21 +2,19 @@ package dataaccess;
 
 import model.AuthData;
 import model.UserData;
-import org.eclipse.jetty.server.Authentication;
 import org.junit.jupiter.api.*;
 
-import javax.xml.crypto.Data;
 import java.sql.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 public class SQLDataBaseTests {
-    private static mySQLDataBase sqlDB;
+    private static MySQLDataBase sqlDB;
     UserData r = new UserData("testUser", "testPassword", "test@test.com");
     @BeforeEach
     public void init() {
         DatabaseManager.callCreate();
-        sqlDB = new mySQLDataBase();
+        sqlDB = new MySQLDataBase();
     }
 
     @AfterEach
@@ -104,5 +102,15 @@ public class SQLDataBaseTests {
         AuthData a = sqlDB.createAuth("badUser");
 
         assertNull(a);
+    }
+
+    @Test
+    @DisplayName("Successful get auth")
+    public void getAuthSuccess() {
+        sqlDB.createUser(r);
+        AuthData a = sqlDB.createAuth(r.username());
+        AuthData b = sqlDB.getAuthData(a.authToken());
+
+        assertEquals(b,a);
     }
 }
