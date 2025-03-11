@@ -5,6 +5,7 @@ import model.ListGamesResult;
 import model.UserData;
 import model.AuthData;
 import exception.ResponseException;
+import org.mindrot.jbcrypt.BCrypt;
 
 public class Service {
     private final DataAccess dataaccess;
@@ -15,16 +16,17 @@ public class Service {
 
     public AuthData registerRequest(UserData req) throws ResponseException {
         String username = req.username();
-        String password = req.password();
+        String password = hashPassword(req.password());
         String email = req.email();
-        if ((username == null) || (password == null) || (email == null) || (username.isEmpty()) || (password.isEmpty()) || (email.isEmpty())) {
+        if ((username == null) || (req.password() == null) || (email == null) || (username.isEmpty()) || (password.isEmpty()) || (email.isEmpty())) {
             throw new ResponseException(400, "Error: bad request");
         }
         var userData = dataaccess.getUser(username);
         if (userData != null) {
             throw new ResponseException(403, "Error: already taken");
         }
-        dataaccess.createUser(req);
+        UserData hashedUser = new UserData(req.username(), password, req.email());
+        dataaccess.createUser(hashedUser);
         return dataaccess.createAuth(req.username());
     }
 
@@ -36,7 +38,7 @@ public class Service {
         if (info == null) {
             throw new ResponseException(401, "Error: unauthorized");
         }
-        if (! info.password().equals(password)) {
+        if (! BCrypt.checkpw(password, info.password())) {
             throw new ResponseException(401, "Error: unauthorized");
         }
         return dataaccess.createAuth(req.username());
@@ -114,5 +116,9 @@ public class Service {
 
     public void deleteDataBase() {
         dataaccess.deleteFullDataBase();
+    }
+
+    public String hashPassword(String password) {
+        return BCrypt.hashpw(password, BCrypt.gensalt());
     }
 }

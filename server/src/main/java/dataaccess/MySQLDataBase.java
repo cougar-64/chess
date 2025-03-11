@@ -86,7 +86,8 @@ public class MySQLDataBase extends DatabaseManager implements DataAccess {
                         result.getString("email")
                 );
             }
-            throw new DataAccessException("Error: Could not find user_data with username " + username);
+            return null;
+//            throw new DataAccessException("Error: Could not find user_data with username " + username);
         } catch (SQLException | DataAccessException e) {
             System.err.println(e.getMessage());
             return null;
@@ -96,20 +97,15 @@ public class MySQLDataBase extends DatabaseManager implements DataAccess {
     public void createUser(UserData r) {
         String insertUser = "INSERT INTO userData (username, email, password) VALUES (?, ?, ?)";
         try (Connection conn = DatabaseManager.getConnection();
-            PreparedStatement statement = conn.prepareStatement(insertUser)) {
-            String hashedPassword = hashPassword(r.password());
+             PreparedStatement statement = conn.prepareStatement(insertUser)) {
             statement.setString(1, r.username());
             statement.setString(2, r.email());
-            statement.setString(3, hashedPassword);
+            statement.setString(3, r.password());
             int success = statement.executeUpdate();
             didDatabaseExecute(success);
         } catch (SQLException | DataAccessException e) {
             System.err.println(e.getMessage());
         }
-    }
-
-    private String hashPassword(String password) {
-        return BCrypt.hashpw(password, BCrypt.gensalt());
     }
 
     public AuthData createAuth(String username) {
@@ -240,7 +236,20 @@ public class MySQLDataBase extends DatabaseManager implements DataAccess {
              ObjectInputStream ois = new ObjectInputStream(bis)) {
             return (ChessGame) ois.readObject();
         } catch (IOException | ClassNotFoundException e) {
-            e.printStackTrace();
+            System.err.println(e.getMessage());
+            return null;
+        }
+    }
+
+    private static byte[] serializeGame(ChessGame game) {
+        if (game == null) return null;
+        try (ByteArrayOutputStream bos = new ByteArrayOutputStream();
+             ObjectOutputStream oos = new ObjectOutputStream(bos)) {
+            oos.writeObject(game);  // Serialize the ChessGame object
+            oos.flush();
+            return bos.toByteArray();  // Return the byte array
+        } catch (IOException e) {
+            System.err.println(e.getMessage());
             return null;
         }
     }
@@ -252,13 +261,14 @@ public class MySQLDataBase extends DatabaseManager implements DataAccess {
                 black_username, game_name, game)
                 VALUES = (?, ?, ?, ?, ?)""";
         ChessGame chessGame = new ChessGame();
+        byte[] serializedGame = serializeGame(chessGame);
         try (Connection conn = DatabaseManager.getConnection();
             PreparedStatement game = conn.prepareStatement(createGame)) {
             game.setInt(1, randInt);
             game.setString(2, null);
             game.setString(3, null);
             game.setString(4, gameName);
-            game.setObject(5, chessGame);
+            game.setObject(5, serializedGame);
             int inserted = game.executeUpdate();
             didDatabaseExecute(inserted);
             return new GameData(randInt, null, null, gameName, chessGame);
@@ -339,9 +349,10 @@ public class MySQLDataBase extends DatabaseManager implements DataAccess {
     }
 
     public void deleteFullDataBase() {
-        String dropUser = "DROP TABLE userData";
-        String dropAuth = "DROP TABLE authData";
-        String dropGame = "DROP TABLE gameData";
+        String dropUser = "TRUNCATE TABLE userData";
+        String dropAuth = "TRUNCATE TABLE authData";
+        String dropGame = "TRUNCATE TABLE gameData";
+        String dropJoin = "TRUNCATE TABLE joinUserAuth";
         try (Connection conn = DatabaseManager.getConnection()) {
             disableFK(conn);
             PreparedStatement userStatement = conn.prepareStatement(dropUser);
@@ -350,6 +361,8 @@ public class MySQLDataBase extends DatabaseManager implements DataAccess {
             authStatement.executeUpdate();
             PreparedStatement gameStatement = conn.prepareStatement(dropGame);
             gameStatement.executeUpdate();
+            PreparedStatement joinStatement = conn.prepareStatement(dropJoin);
+            joinStatement.executeUpdate();
             enableFK(conn);
         } catch (SQLException |DataAccessException e) {
             System.err.println(e.getMessage());

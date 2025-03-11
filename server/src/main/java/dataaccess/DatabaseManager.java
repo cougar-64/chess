@@ -54,6 +54,13 @@ public class DatabaseManager {
     public static DataAccess callCreate() {
         try {
             createDatabase();
+            String useDB = "USE " + DATABASE_NAME;
+        try (Connection conn = DriverManager.getConnection(CONNECTION_URL, USER, PASSWORD);
+            PreparedStatement statement = conn.prepareStatement(useDB)) {
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            System.err.println(e.getMessage());
+        }
             MySQLDataBase da = new MySQLDataBase();
             return da;
         } catch (DataAccessException e) {

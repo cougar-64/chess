@@ -1,5 +1,6 @@
 package chess;
 
+import java.io.Serializable;
 import java.sql.Array;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -10,7 +11,7 @@ import java.util.Collection;
  * Note: You can add to this class, but you may not alter
  * signature of the existing methods.
  */
-public class ChessGame {
+public class ChessGame implements Serializable {
     protected ChessBoard board = new ChessBoard();
     protected TeamColor teamColor = TeamColor.WHITE;
 
