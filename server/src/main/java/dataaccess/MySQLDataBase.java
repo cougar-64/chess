@@ -165,7 +165,7 @@ public class MySQLDataBase extends DatabaseManager implements DataAccess {
             authTokenStatement.setString(1, auth);
             ResultSet authTokens = authTokenStatement.executeQuery();
             if (!authTokens.next()) {
-                throw new DataAccessException("auth_data does not exist for auth_token" + auth);
+                return null;
             }
             int authID = authTokens.getInt("auth_id");
             try (PreparedStatement authDataStatement = conn.prepareStatement(getAuthData)) {
@@ -178,7 +178,7 @@ public class MySQLDataBase extends DatabaseManager implements DataAccess {
                 );
                 }
             }
-            throw new DataAccessException("Unable to retrieve the authData!");
+            return null;
         } catch (SQLException | DataAccessException e) {
             System.err.println(e.getMessage());
             return null;
@@ -215,7 +215,7 @@ public class MySQLDataBase extends DatabaseManager implements DataAccess {
             while (gameSet.next()) {
                 ChessGame game = deserializeGame(gameSet.getBytes("game"));
                 GameData newGame = new GameData(
-                        gameSet.getInt("id"),
+                        gameSet.getInt("game_id"),
                         gameSet.getString("white_username"),
                         gameSet.getString("black_username"),
                         gameSet.getString("game_name"),
@@ -259,7 +259,7 @@ public class MySQLDataBase extends DatabaseManager implements DataAccess {
         String createGame = """
                 INSERT INTO gameData (game_id, white_username,
                 black_username, game_name, game)
-                VALUES = (?, ?, ?, ?, ?)""";
+                VALUES (?, ?, ?, ?, ?)""";
         ChessGame chessGame = new ChessGame();
         byte[] serializedGame = serializeGame(chessGame);
         try (Connection conn = DatabaseManager.getConnection();
@@ -284,7 +284,7 @@ public class MySQLDataBase extends DatabaseManager implements DataAccess {
         try (Connection conn = DatabaseManager.getConnection();
             PreparedStatement getGameData = conn.prepareStatement(isIntInGameData)) {
             while (true) {
-                int randInt = 1000 + random.nextInt();
+                int randInt = 1000 + random.nextInt(9000);
                 getGameData.setInt(1, randInt);
                 return randInt;
             }
@@ -295,7 +295,7 @@ public class MySQLDataBase extends DatabaseManager implements DataAccess {
     }
 
     public GameData getGame(int gameID) {
-        String getGame = "SELECT FROM GameData WHERE game_id = ?";
+        String getGame = "SELECT * FROM GameData WHERE game_id = ?";
         try (Connection conn = DatabaseManager.getConnection();
             PreparedStatement gameStatement = conn.prepareStatement(getGame)) {
             gameStatement.setInt(1,gameID);
@@ -310,7 +310,7 @@ public class MySQLDataBase extends DatabaseManager implements DataAccess {
                         game
                 );
             }
-            throw new DataAccessException("Error: Could not find the game with game_id " + gameID);
+            return null;
         } catch (SQLException | DataAccessException e) {
             System.err.println(e.getMessage());
             return null;
@@ -318,12 +318,12 @@ public class MySQLDataBase extends DatabaseManager implements DataAccess {
     }
 
     public void updateGameData(String playerColor, GameData game, String username) {
-        String selectGame = "SELECT FROM gameData WHERE user_id = ?";
+        String selectGame = "SELECT * FROM gameData WHERE game_id = ?";
         String insertWhiteUser = """
-                INSERT INTO gameData (white_username) VALUES (?)
+                UPDATE gameData SET white_username = ? WHERE game_id = ?
                 """;
         String insertBlackUser = """
-                INSERT INTO gameData (black_username) VALUES (?)
+                UPDATE gameData SET black_username = ? WHERE game_id = ?
                 """;
         try (Connection conn = DatabaseManager.getConnection();
             PreparedStatement selectStatement = conn.prepareStatement(selectGame)) {
@@ -333,12 +333,14 @@ public class MySQLDataBase extends DatabaseManager implements DataAccess {
                 if (playerColor.equals("WHITE")) {
                     PreparedStatement insertWhite = conn.prepareStatement(insertWhiteUser);
                     insertWhite.setString(1, username);
+                    insertWhite.setInt(2, game.gameID());
                     int whiteSuccess = insertWhite.executeUpdate();
                     didDatabaseExecute(whiteSuccess);
                 }
                 else {
                     PreparedStatement insertBlack = conn.prepareStatement(insertBlackUser);
                     insertBlack.setString(1, username);
+                    insertBlack.setInt(2, game.gameID());
                     int blackSuccess = insertBlack.executeUpdate();
                     didDatabaseExecute(blackSuccess);
                 }

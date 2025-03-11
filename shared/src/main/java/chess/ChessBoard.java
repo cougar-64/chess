@@ -1,5 +1,6 @@
 package chess;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Objects;
 
@@ -9,7 +10,7 @@ import java.util.Objects;
  * Note: You can add to this class, but you may not alter
  * signature of the existing methods.
  */
-public class ChessBoard implements Cloneable {
+public class ChessBoard implements Cloneable, Serializable {
     protected ChessPiece[][] squares = new ChessPiece[8][8];
     protected String boardState;
     public ChessBoard() {

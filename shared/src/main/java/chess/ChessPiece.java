@@ -1,5 +1,6 @@
 package chess;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Objects;
@@ -10,7 +11,7 @@ import java.util.Objects;
  * Note: You can add to this class, but you may not alter
  * signature of the existing methods.
  */
-public class ChessPiece implements Cloneable {
+public class ChessPiece implements Cloneable, Serializable {
     private ChessGame.TeamColor pieceColor;
     private PieceType type;
 

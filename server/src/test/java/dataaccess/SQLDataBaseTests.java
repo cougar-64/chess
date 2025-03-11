@@ -1,10 +1,12 @@
 package dataaccess;
 
 import model.AuthData;
+import model.GameData;
 import model.UserData;
 import org.junit.jupiter.api.*;
 
 import java.sql.*;
+import java.util.ArrayList;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -146,6 +148,17 @@ public class SQLDataBaseTests {
     @Test
     @DisplayName("list games success")
     public void listGamesSuccess() {
+        sqlDB.createUser(r);
+        GameData g = sqlDB.createGame("testGame");
+        GameData a = sqlDB.getGame(g.gameID());
+        assertNotNull(a);
+    }
 
+    @Test
+    @DisplayName("list game fail")
+    public void listGamesFail() {
+        sqlDB.createUser(r);
+        GameData a = sqlDB.getGame(1);
+        assertNull(a);
     }
 }
