@@ -1,8 +1,15 @@
 package ui;
+import Server.ServerFacade;
+
 import java.util.Scanner;
 
 public class Client {
+    private String url;
+    public Client(String url) {
+        this.url = url;
+    }
     boolean isLoggedIn = false;
+    ServerFacade serverFacade = new ServerFacade(url);
 
     public void preLoginMenu() {
         Scanner scanner = new Scanner(System.in);
