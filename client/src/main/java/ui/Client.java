@@ -1,35 +1,38 @@
 package ui;
 import Server.ServerFacade;
+import exception.ResponseException;
 
 import java.util.Scanner;
 
 public class Client {
+    private ServerFacade serverFacade;
     private String url;
     public Client(String url) {
         this.url = url;
+        this.serverFacade = new ServerFacade(url);
     }
     boolean isLoggedIn = false;
-    ServerFacade serverFacade = new ServerFacade(url);
 
     public void preLoginMenu() {
         Scanner scanner = new Scanner(System.in);
+        System.out.println("Welcome to CS 240 chess! ♛ ♚ ♞ \n Type 'help' to get started");
         while (true) {
-            System.out.println("Welcome to CS 240 chess! ♛ ♚ ♞ \n Type 'help' to get started");
             String input = scanner.nextLine();
             switch (input) {
                 case "help":
                     preHelp();
+                    break;
                 case "quit":
-                    System.out.print("Are you sure you want to quit? y/n");
-                    input = scanner.next();
-                    if (input.equals("y")) {
-                        System.exit(0);
-                    }
+                    quit();
+                    break;
                 case "register":
                     preRegister();
                     break;
                 case "login":
                     preLogin();
+                    break;
+                case "clear":
+                    clear();
                     break;
                 default:
                     System.out.println("Invalid input! Please type 'help' to get started");
@@ -46,6 +49,17 @@ public class Client {
                 help -- lists possible commands""");
     }
 
+    public void quit() {
+        Scanner scanner = new Scanner(System.in);
+        while (true) {
+            System.out.print("Are you sure you want to quit? y/n ");
+            String input = scanner.next();
+            if (input.equals("y")) {
+                System.exit(0);
+            }
+        }
+    }
+
     private void preLogin() {
         Scanner scanner = new Scanner(System.in);
         String[] words;
@@ -60,52 +74,68 @@ public class Client {
         }
         // make a call to the login api endpoint using words[0], words[1] and return anything if needed (phase 2)
         isLoggedIn = true;
-        postLoginMenu();
+        postLoginMenu(words[0]);
     }
 
     private void preRegister() {
         Scanner scanner = new Scanner(System.in);
-        String[] words;
-         System.out.println("please enter a username, password, and email you would like to use, like this: exampleUser examplePassword example@email.com");
-         while (true) {
-             String registerCredentials = scanner.nextLine();
-             words = registerCredentials.split("\\s+");
-             if (words.length == 3) {
-                 break;
-             }
-             System.out.println("Error: cannot read input. Please enter a username, password, and email with a single space in between and without a comma, like this: exampleUser examplePassword example@email.com");
-         }
-         // make a call to the register api endpoint using words[0], words[1], and words[2]
-        isLoggedIn = true;
-         postLoginMenu();
+        while (true) {
+            String[] words;
+            System.out.println("please enter a username, password, and email you would like to use, like this: exampleUser examplePassword example@email.com. Or type '..' to go back to the main menu");
+            while (true) {
+                String registerCredentials = scanner.nextLine();
+                words = registerCredentials.split("\\s+");
+                if (words.length == 3) {
+                    break;
+                }
+                if (registerCredentials.equals("..")) {
+                    preLoginMenu();
+                }
+                System.out.println("Error: cannot read input. Please enter a username, password, and email with a single space in between and without a comma, like this: exampleUser examplePassword example@email.com");
+            }
+            try {
+                serverFacade.register(words[0], words[1], words[2]);
+                isLoggedIn = true;
+                postLoginMenu(words[0]);
+            } catch (ResponseException e) {
+                System.err.println(e.getMessage());
+            }
+        }
     }
 
     public void postLoginMenu(String username) {
         Scanner scanner = new Scanner(System.in);
         if (isLoggedIn) {
+            System.out.println("welcome," + username + "! Type 'help' to see your logged-in menu options");
             while (true) {
-                System.out.println("welcome," + username + "! Type 'help' to see your logged-in menu options");
                 String input = scanner.nextLine();
                 switch (input) {
-                    case ("create"):
+                    case "create":
                         create();
-                    case ("list"):
+                        break;
+                    case "list":
                         list();
-                    case ("join"):
+                        break;
+                    case "join":
                         join();
-                    case ("observe"):
+                        break;
+                    case "observe":
                         observe();
-                    case ("logout"):
+                        break;
+                    case "logout":
                         logout();
                         break;
-                    case ("quit"):
-                        System.out.print("Are you sure you want to quit? y/n");
-                        input = scanner.next();
-                        if (input.equals("y")) {
-                            System.exit(0);
-                        }
-                    case ("help"):
+                    case "quit":
+                        quit();
+                        break;
+                    case "help":
                         postHelp();
+                        break;
+                    case "clear":
+                        clear();
+                        break;
+                    default:
+                        System.out.println("Invalid input! please type 'help' to get started");
                 }
             }
         }
@@ -130,7 +160,7 @@ public class Client {
             System.out.println("Please enter the name for your new game: (note, this will only create the game. You must still join the game after)");
             String gameName = scanner.nextLine();
             words = gameName.split("\\s+");
-            if (words.length == 2) {
+            if (words.length == 1) {
                 break;
             }
             System.out.println("Error: too many words. Please enter a game name that is a single word, without any spaces");
@@ -180,5 +210,16 @@ public class Client {
         // make the server call to log out
         isLoggedIn = false;
         preLoginMenu();
+    }
+
+    private void clear() {
+        // clears the database - meant only for testing purposes
+        // is not listed in "help"
+        // delete when deployed!!!!
+        try {
+            serverFacade.clear();
+        } catch (ResponseException r) {
+            System.err.println(r.getMessage());
+        }
     }
 }

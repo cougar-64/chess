@@ -4,19 +4,48 @@ import exception.ResponseException;
 
 import java.io.*;
 import java.net.*;
+import model.*;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class ServerFacade {
-    private String serverUrl;
+    private final String serverUrl;
     public ServerFacade(String url) {
         this.serverUrl = url;
     }
 
-    private <T> T makeRequest(String method, String path, Object request, Class<T> responseClass) throws ResponseException {
+    public AuthData register(String username, String password, String email) throws ResponseException {
+        UserData user = new UserData(username, password, email);
+        var path = "/user";
+        return makeRequest("POST", path, user, AuthData.class, null);
+    }
+
+    public AuthData login(String username, String password) throws ResponseException {
+        UserData user = new UserData(username, password, null);
+        var path = "/session";
+        return makeRequest("POST", path, user, AuthData.class, null);
+    }
+
+    public void logout(String AuthToken)throws ResponseException {
+        Map<String, String> map = new HashMap<>();
+        map.put("Authorization", AuthToken);
+        var path = "/session";
+        makeRequest("DELETE", path, null, null, map);
+    }
+
+    private <T> T makeRequest(String method, String path, Object request, Class<T> responseClass, Map<String, String> headers) throws ResponseException {
         try {
             URL url = (new URI(serverUrl + path)).toURL();
             HttpURLConnection http = (HttpURLConnection) url.openConnection();
             http.setRequestMethod(method);
             http.setDoOutput(true);
+
+            if (headers != null) {
+                for (Map.Entry<String, String> entry : headers.entrySet()) {
+                    http.setRequestProperty(entry.getKey(), entry.getValue());
+                }
+            }
 
             writeBody(request, http);
             http.connect();
@@ -68,5 +97,10 @@ public class ServerFacade {
 
     private boolean isSuccessful(int status) {
         return status / 100 == 2;
+    }
+
+    public void clear() throws ResponseException {
+        var path = "/db";
+        makeRequest("DELETE", path, null, null, null);
     }
 }
