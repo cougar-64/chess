@@ -170,7 +170,7 @@ public class Client {
                 """);
     }
 
-    private void create() {
+    private GameData create() {
         Scanner scanner = new Scanner(System.in);
         String[] words;
         while (true) {
@@ -185,7 +185,15 @@ public class Client {
             }
             System.out.println("Error: too many words. Please enter a game name that is a single word, without any spaces, or type '..' to return to the main menu");
         }
-        // make server call to endpoint
+        try {
+            GameData game = serverFacade.create(authToken, words[0]);
+            System.out.println("gameID: " + game.gameID());
+            // this function is now finished, it will return to the main menu
+            postLoginMenu(username);
+        } catch (ResponseException e) {
+            System.err.println(e.getMessage());
+        }
+        return null;
     }
 
     private void list() {

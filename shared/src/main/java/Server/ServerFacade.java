@@ -1,4 +1,5 @@
 package Server;
+import chess.ChessGame;
 import com.google.gson.Gson;
 import exception.ResponseException;
 
@@ -27,11 +28,19 @@ public class ServerFacade {
         return makeRequest("POST", path, user, AuthData.class, null);
     }
 
-    public void logout(String AuthToken)throws ResponseException {
+    public void logout(String authToken) throws ResponseException {
         Map<String, String> map = new HashMap<>();
-        map.put("Authorization", AuthToken);
+        map.put("Authorization", authToken);
         var path = "/session";
         makeRequest("DELETE", path, null, null, map);
+    }
+
+    public GameData create(String authToken, String gameName) throws ResponseException {
+        Map<String, String> map = new HashMap<>();
+        map.put("Authorization", authToken);
+        GameData game = new GameData(0, null, null, gameName, new ChessGame());
+        var path = "/game";
+        return makeRequest("POST", path, game, GameData.class, map);
     }
 
     private <T> T makeRequest(String method, String path, Object request, Class<T> responseClass, Map<String, String> headers) throws ResponseException {
