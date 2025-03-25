@@ -300,7 +300,8 @@ public class Client {
                     "or type '..' to return to the main menu");
         }
         // make the call to observe the game - make sure it's from white's view!!
-            // find the game by the game number - similar to join. Except instead of joining, just print the game.game() and make sure it's from white's view
+            // find the game by the game number - similar to join. Except instead of joining,
+        // just print the game.game() and make sure it's from white's view
         try {
             GameData game = gameList.get(words[0]);
             System.out.print(game.game());
