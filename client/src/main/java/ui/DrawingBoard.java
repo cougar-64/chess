@@ -30,13 +30,7 @@ public class DrawingBoard {
     public void printBoardFromWhite() {
         for (int i = 0; i < 10; i++) {
             for (int j = 0; j < 10; j++) {
-                if (i == 0 || i == 9 || j == 0 || j == 9) {
-                    System.out.print(borderColor + board[i][j]);
-                }
-                else {
-                    boolean darkOrLight = (i + j) % 2 == 0;
-                    System.out.print((darkOrLight ? lightColor : darkColor) + board[i][j] + reset);
-                }
+                checkBounds(i, j);
             }
             System.out.println(reset);
         }
@@ -45,13 +39,7 @@ public class DrawingBoard {
     public void printBoardFromBlack() {
         for (int i = 9; i >= 0; i--) {
             for (int j = 9; j >= 0; j--) {
-                if (i == 0 || i == 9 || j == 0 || j == 9) {
-                    System.out.print(borderColor + board[i][j]);
-                }
-                else {
-                    boolean darkOrLight = (i + j) % 2 == 0;
-                    System.out.print((darkOrLight ? lightColor : darkColor) + board[i][j] + reset);
-                }
+                checkBounds(i, j);
             }
             System.out.println(reset);
         }
@@ -62,5 +50,15 @@ public class DrawingBoard {
         draw.printBoardFromWhite();
         System.out.println("\n");
         draw.printBoardFromBlack();
+    }
+
+    private void checkBounds(int i, int j) {
+        if (i == 0 || i == 9 || j == 0 || j == 9) {
+            System.out.print(borderColor + board[i][j]);
+        }
+        else {
+            boolean darkOrLight = (i + j) % 2 == 0;
+            System.out.print((darkOrLight ? lightColor : darkColor) + board[i][j] + reset);
+        }
     }
 }

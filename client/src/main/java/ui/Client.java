@@ -1,5 +1,5 @@
 package ui;
-import Server.ServerFacade;
+import server.ServerFacade;
 import exception.ResponseException;
 import model.*;
 
@@ -80,7 +80,8 @@ public class Client {
             else if (loginCredentials.equals("..")) {
                 preLoginMenu();
             }
-            System.out.println("Error: cannot read input. Please enter your username and password with a single space in between and without a comma, like this: exampleUser examplePassword, or type '..' to return to the main menu");
+            System.out.println("Error: cannot read input. Please enter your username and password with a single space in between and without a comma, like this: " +
+                    "exampleUser examplePassword, or type '..' to return to the main menu");
         }
         try {
             AuthData auth = serverFacade.login(words[0], words[1]);
@@ -97,7 +98,8 @@ public class Client {
         Scanner scanner = new Scanner(System.in);
         while (true) {
             String[] words;
-            System.out.println("please enter a username, password, and email you would like to use, like this: exampleUser examplePassword example@email.com. Or type '..' to go back to the main menu");
+            System.out.println("please enter a username, password, and email you would like to use, like this: exampleUser examplePassword example@email.com. " +
+                    "Or type '..' to go back to the main menu");
             while (true) {
                 String registerCredentials = scanner.nextLine();
                 words = registerCredentials.split("\\s+");
@@ -107,7 +109,8 @@ public class Client {
                 else if (registerCredentials.equals("..")) {
                     preLoginMenu();
                 }
-                System.out.println("Error: cannot read input. Please enter a username, password, and email with a single space in between and without a comma, like this: exampleUser examplePassword example@email.com, or type '..' to return to the main menu");
+                System.out.println("Error: cannot read input. Please enter a username, password, and email with a single space in between and without a comma, like this: " +
+                        "exampleUser examplePassword example@email.com, or type '..' to return to the main menu");
             }
             try {
                 AuthData auth = serverFacade.register(words[0], words[1], words[2]);
@@ -175,7 +178,8 @@ public class Client {
         Scanner scanner = new Scanner(System.in);
         String[] words;
         while (true) {
-            System.out.println("Please enter the name for your new game: (note, this will only create the game. You must still join the game after). Or type '..' to return to the main menu");
+            System.out.println("Please enter the name for your new game: (note, this will only create the game. You must still join the game after). " +
+                    "Or type '..' to return to the main menu");
             String gameName = scanner.nextLine();
             words = gameName.split("\\s+");
             if (words.length == 1) {
@@ -184,7 +188,8 @@ public class Client {
             else if (gameName.equals("..")) {
                 postLoginMenu(username);
             }
-            System.out.println("Error: too many words. Please enter a game name that is a single word, without any spaces, or type '..' to return to the main menu");
+            System.out.println("Error: too many words. Please enter a game name that is a single word, without any spaces, " +
+                    "or type '..' to return to the main menu");
         }
         try {
             GameData game = serverFacade.create(authToken, words[0]);
@@ -206,7 +211,8 @@ public class Client {
             }
             for (Map.Entry<Integer, GameData> entry : gameList.entrySet()){
                 GameData game = entry.getValue();
-                System.out.println("Game " + entry.getKey() + ": " + "Game ID: " + game.gameID() + " Players: " + game.whiteUsername() + ", " + game.blackUsername());
+                System.out.println("Game " + entry.getKey() + ": " + "Game ID: " + game.gameID() + " Players: " +
+                        game.whiteUsername() + ", " + game.blackUsername());
             }
             // this function is done so it now returns to post-login menu
             postLoginMenu(username);
@@ -236,7 +242,8 @@ public class Client {
         Scanner scanner = new Scanner(System.in);
         String[] words;
         while (true) {
-            System.out.println("Please enter the game number for the game you want to join (corresponds to the game list), and either WHITE or BLACK to choose the player color (an available color). Or type '..' to return to the main menu");
+            System.out.println("Please enter the game number for the game you want to join (corresponds to the game list), " +
+                    "and either WHITE or BLACK to choose the player color (an available color). Or type '..' to return to the main menu");
             String input = scanner.nextLine();
             words = input.split("\\s+");
             if (input.equals("..")) {
@@ -244,7 +251,8 @@ public class Client {
                 return;
             }
             else if (words.length != 2) {
-                System.out.println("Error: too many or too little words. Please enter the number (in the 'list' function) for the game you want to join and then WHITE or BLACK without any commas, or type '..' to return to the main menu");
+                System.out.println("Error: too many or too little words. Please enter the number (in the 'list' function) " +
+                        "for the game you want to join and then WHITE or BLACK without any commas, or type '..' to return to the main menu");
                 continue;
             }
             try {
@@ -268,7 +276,8 @@ public class Client {
         Scanner scanner = new Scanner(System.in);
         String[] words;
         while (true) {
-            System.out.println("Please enter the game number you wish to observe. This game number corresponds with the list of games. to view the list again, type 'list'. Or type '..' to return to the main menu");
+            System.out.println("Please enter the game number you wish to observe. This game number corresponds with the list of games. " +
+                    "to view the list again, type 'list'. Or type '..' to return to the main menu");
             String gameNumber = scanner.nextLine();
             words = gameNumber.split("\\s+");
             if (words.length == 1) {
@@ -281,7 +290,8 @@ public class Client {
             else if (gameNumber.equals("..")) {
                 postLoginMenu(username);
             }
-            System.out.println("Error: too many words. Please input the game number you want to view, or type 'list' to see the list of games, or type '..' to return to the main menu");
+            System.out.println("Error: too many words. Please input the game number you want to view, or type 'list' to see the list of games, " +
+                    "or type '..' to return to the main menu");
         }
         // make the call to observe the game - make sure it's from white's view!!
             // find the game by the game number - similar to join. Except instead of joining, just print the game.game() and make sure it's from white's view
