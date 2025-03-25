@@ -3,15 +3,17 @@ import Server.ServerFacade;
 import exception.ResponseException;
 import model.*;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Scanner;
 
 public class Client {
     private ServerFacade serverFacade;
-    private String url;
     private String username;
     private String authToken;
+    HashMap<Integer, GameData> gameList = new HashMap<>(); // needed up here to keep a memory of what game was where. Cleared each time list is called
     public Client(String url) {
-        this.url = url;
         this.serverFacade = new ServerFacade(url);
     }
     boolean isLoggedIn = false;
@@ -197,7 +199,18 @@ public class Client {
     }
 
     private void list() {
-        // make the call to the server and get the list of games back.
+        try {
+            ListGamesResult listOfGames = serverFacade.listGames(authToken);
+            for (int i = 0; i < listOfGames.games().size(); i++) {
+                gameList.put(i, listOfGames.games().get(i));
+            }
+            for (Map.Entry<Integer, GameData> entry : gameList.entrySet()){
+                System.out.println("Game " + entry.getKey() + ": " + entry.getValue());
+            }
+            postLoginMenu(username);
+        } catch (ResponseException e) {
+            System.err.println(e.getMessage());
+        }
     }
 
     private void join() {

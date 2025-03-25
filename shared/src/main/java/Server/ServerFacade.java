@@ -7,7 +7,9 @@ import java.io.*;
 import java.net.*;
 import model.*;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class ServerFacade {
@@ -41,6 +43,13 @@ public class ServerFacade {
         GameData game = new GameData(0, null, null, gameName, new ChessGame());
         var path = "/game";
         return makeRequest("POST", path, game, GameData.class, map);
+    }
+
+    public ListGamesResult listGames(String authToken) throws ResponseException {
+        Map<String, String> map = new HashMap<>();
+        map.put("Authorization", authToken);
+        var path = "/game";
+        return makeRequest("GET", path, null, ListGamesResult.class, map);
     }
 
     private <T> T makeRequest(String method, String path, Object request, Class<T> responseClass, Map<String, String> headers) throws ResponseException {
