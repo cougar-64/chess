@@ -56,7 +56,7 @@ public class ServerFacadeTests {
     @Test
     public void loginFailure() {
         Exception exception = assertThrows(ResponseException.class, () -> {facade.login(null, null);});
-        assertEquals("Error: bad request", exception.getMessage());
+        assertEquals("Error: unauthorized", exception.getMessage());
     }
 
     @Test
