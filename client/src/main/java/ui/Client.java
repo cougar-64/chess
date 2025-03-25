@@ -206,7 +206,7 @@ public class Client {
             }
             for (Map.Entry<Integer, GameData> entry : gameList.entrySet()){
                 GameData game = entry.getValue();
-                System.out.println("Game " + entry.getKey() + ": " + game.gameID() + "; " + game.whiteUsername() + ", " + game.blackUsername());
+                System.out.println("Game " + entry.getKey() + ": " + "Game ID: " + game.gameID() + " Players: " + game.whiteUsername() + ", " + game.blackUsername());
             }
             // this function is done so it now returns to post-login menu
             postLoginMenu(username);
@@ -228,33 +228,39 @@ public class Client {
 
     private void join() {
         initGameList();
+        if (gameList.size() == 0) {
+            System.out.println("There are no current games to join");
+            System.out.println("Automatically redirecting to create a game...");
+            create();
+        }
         Scanner scanner = new Scanner(System.in);
         String[] words;
         while (true) {
             System.out.println("Please enter the game number for the game you want to join (corresponds to the game list), and either WHITE or BLACK to choose the player color (an available color). Or type '..' to return to the main menu");
-            String input  = scanner.nextLine();
+            String input = scanner.nextLine();
             words = input.split("\\s+");
-            if (words.length == 2) {
-                break;
-            }
-            else if (input.equals("..")) {
+            if (input.equals("..")) {
                 postLoginMenu(username);
+                return;
             }
-            System.out.println("Error: too many or too little words. Please enter the number (in the 'list' function) for the game you want to join and then WHITE or BLACK without any commas, or type '..' to return to the main menu");
-        }
-        try {
-            serverFacade.join(authToken, words[0], words[1], gameList);
-            DrawingBoard draw = new DrawingBoard();
-            if (words[1].equals("WHITE")) {
-                draw.printBoardFromWhite();
+            else if (words.length != 2) {
+                System.out.println("Error: too many or too little words. Please enter the number (in the 'list' function) for the game you want to join and then WHITE or BLACK without any commas, or type '..' to return to the main menu");
+                continue;
             }
-            else if (words[1].equals("BLACK")) {
-                draw.printBoardFromBlack();
+            try {
+                serverFacade.join(authToken, words[0], words[1], gameList);
+                DrawingBoard draw = new DrawingBoard();
+                if (words[1].equals("WHITE")) {
+                    draw.printBoardFromWhite();
+                } else if (words[1].equals("BLACK")) {
+                    draw.printBoardFromBlack();
+                }
+                // this function is done so it defaults back to the post-login menu
+                postLoginMenu(username);
+            } catch (ResponseException e) {
+                System.err.println(e.getMessage());
+                System.out.println("Please try again");
             }
-            // this function is done so it defaults back to the post-login menu
-            postLoginMenu(username);
-        } catch (ResponseException e) {
-            System.err.println(e.getMessage());
         }
     }
 
@@ -278,6 +284,13 @@ public class Client {
             System.out.println("Error: too many words. Please input the game number you want to view, or type 'list' to see the list of games, or type '..' to return to the main menu");
         }
         // make the call to observe the game - make sure it's from white's view!!
+            // find the game by the game number - similar to join. Except instead of joining, just print the game.game() and make sure it's from white's view
+        try {
+            GameData game = gameList.get(words[0]);
+            System.out.print(game.game());
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+        }
     }
 
     private void logout() {
