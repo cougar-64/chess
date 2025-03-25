@@ -7,9 +7,7 @@ import java.io.*;
 import java.net.*;
 import model.*;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class ServerFacade {
@@ -52,6 +50,19 @@ public class ServerFacade {
         return makeRequest("GET", path, null, ListGamesResult.class, map);
     }
 
+    public void join(String authToken, String gameNumber, String playerColor, HashMap<Integer, GameData> gameList) throws ResponseException {
+        Map<String, String> map = new HashMap<>();
+        map.put("Authorization", authToken);
+        int number = Integer.parseInt(gameNumber);
+        GameData game = gameList.get(number);
+        var path = "/game";
+        Map<String, Object> body = new HashMap<>();
+        body.put("playerColor", playerColor);
+        body.put("gameID", game.gameID());
+
+        makeRequest("PUT", path, body, null, map);
+    }
+
     private <T> T makeRequest(String method, String path, Object request, Class<T> responseClass, Map<String, String> headers) throws ResponseException {
         try {
             URL url = (new URI(serverUrl + path)).toURL();
@@ -78,10 +89,13 @@ public class ServerFacade {
 
     private static void writeBody(Object request, HttpURLConnection http) throws IOException {
         if (request != null) {
-            http.addRequestProperty("Content-Type", "application/json");
+            http.setRequestProperty("Content-Type", "application/json");
+
             String reqData = new Gson().toJson(request);
+
             try (OutputStream reqBody = http.getOutputStream()) {
                 reqBody.write(reqData.getBytes());
+                reqBody.flush();
             }
         }
     }

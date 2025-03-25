@@ -3,7 +3,6 @@ import Server.ServerFacade;
 import exception.ResponseException;
 import model.*;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
@@ -154,7 +153,7 @@ public class Client {
                         clear();
                         break;
                     default:
-                        System.out.println("Invalid input! please type 'help' to get started");
+                        System.out.println("Invalid input! please type 'help' to get started with your logged-in menu");
                 }
             }
         }
@@ -190,7 +189,7 @@ public class Client {
         try {
             GameData game = serverFacade.create(authToken, words[0]);
             System.out.println("gameID: " + game.gameID());
-            // this function is now finished, it will return to the main menu
+            // this function is now finished, it will return to the post-login menu
             postLoginMenu(username);
         } catch (ResponseException e) {
             System.err.println(e.getMessage());
@@ -199,25 +198,40 @@ public class Client {
     }
 
     private void list() {
+        gameList.clear();
         try {
             ListGamesResult listOfGames = serverFacade.listGames(authToken);
-            for (int i = 0; i < listOfGames.games().size(); i++) {
+            for (int i = 1; i < listOfGames.games().size(); i++) {
                 gameList.put(i, listOfGames.games().get(i));
             }
             for (Map.Entry<Integer, GameData> entry : gameList.entrySet()){
-                System.out.println("Game " + entry.getKey() + ": " + entry.getValue());
+                GameData game = entry.getValue();
+                System.out.println("Game " + entry.getKey() + ": " + game.gameID() + "; " + game.whiteUsername() + ", " + game.blackUsername());
             }
+            // this function is done so it now returns to post-login menu
             postLoginMenu(username);
         } catch (ResponseException e) {
             System.err.println(e.getMessage());
         }
     }
 
+    private void initGameList() {
+        try {
+            ListGamesResult listOfGames = serverFacade.listGames(authToken);
+            for (int i = 1; i < listOfGames.games().size(); i++) {
+                gameList.put(i, listOfGames.games().get(i));
+            }
+        } catch (ResponseException e) {
+            System.err.println(e.getMessage());
+        }
+    }
+
     private void join() {
+        initGameList();
         Scanner scanner = new Scanner(System.in);
         String[] words;
         while (true) {
-            System.out.println("Please enter the game ID for the game you want to join, as well as either WHITE or BLACK for the player color. Or type '..' to return to the main menu");
+            System.out.println("Please enter the game number for the game you want to join (corresponds to the game list), and either WHITE or BLACK to choose the player color (an available color). Or type '..' to return to the main menu");
             String input  = scanner.nextLine();
             words = input.split("\\s+");
             if (words.length == 2) {
@@ -226,9 +240,22 @@ public class Client {
             else if (input.equals("..")) {
                 postLoginMenu(username);
             }
-            System.out.println("Error: too many or too little words. Please enter the ID for the game you want to join and then WHITE or BLACK without any commas, or type '..' to return to the main menu");
+            System.out.println("Error: too many or too little words. Please enter the number (in the 'list' function) for the game you want to join and then WHITE or BLACK without any commas, or type '..' to return to the main menu");
         }
-        // make the call to join the game
+        try {
+            serverFacade.join(authToken, words[0], words[1], gameList);
+            DrawingBoard draw = new DrawingBoard();
+            if (words[1].equals("WHITE")) {
+                draw.printBoardFromWhite();
+            }
+            else if (words[1].equals("BLACK")) {
+                draw.printBoardFromBlack();
+            }
+            // this function is done so it defaults back to the post-login menu
+            postLoginMenu(username);
+        } catch (ResponseException e) {
+            System.err.println(e.getMessage());
+        }
     }
 
     private void observe() {
