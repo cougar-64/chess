@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Scanner;
 
 public class Client {
+    private DrawingBoard draw = new DrawingBoard();
     private ServerFacade serverFacade;
     private String username;
     private String authToken;
@@ -151,7 +152,7 @@ public class Client {
                         break;
                     case "quit":
                         quit();
-                        break;
+                        return;
                     case "help":
                         postHelp();
                         break;
@@ -197,7 +198,7 @@ public class Client {
         }
         try {
             GameData game = serverFacade.create(authToken, words[0]);
-            System.out.println("gameID: " + game.gameID());
+            System.out.println("successfully created");
             // this function is now finished, it will return to the post-login menu
             postLoginMenu(username);
         } catch (ResponseException e) {
@@ -210,13 +211,13 @@ public class Client {
         gameList.clear();
         try {
             ListGamesResult listOfGames = serverFacade.listGames(authToken);
-            for (int i = 1; i < listOfGames.games().size(); i++) {
-                gameList.put(i, listOfGames.games().get(i));
+            for (int i = 0; i < listOfGames.games().size(); i++) {
+                gameList.put(i+1, listOfGames.games().get(i));
             }
             for (Map.Entry<Integer, GameData> entry : gameList.entrySet()){
                 GameData game = entry.getValue();
-                System.out.println("Game " + entry.getKey() + ": " + "Game ID: " + game.gameID() + " Players: " +
-                        game.whiteUsername() + ", " + game.blackUsername());
+                System.out.println("Game " + entry.getKey() + ": " + "Game Name: " + game.gameName() + " WHITE: " +
+                        game.whiteUsername() + ", BLACK:" + game.blackUsername());
             }
             // this function is done so it now returns to post-login menu
             postLoginMenu(username);
@@ -260,6 +261,16 @@ public class Client {
                 continue;
             }
             try {
+                var gameNum = Integer.parseInt(words[0]);
+                if (gameNum < 1 || gameNum > gameList.size()) {
+                    System.out.println("Error: entered number is either less than 1 or higher than the amount of games listed. Try again");
+                    continue;
+                }
+            } catch (Exception e) {
+                System.err.println("Error: not a number! Please enter a valid number");
+                continue;
+            }
+            try {
                 serverFacade.join(authToken, words[0], words[1], gameList);
                 DrawingBoard draw = new DrawingBoard();
                 if (words[1].equals("WHITE")) {
@@ -277,17 +288,28 @@ public class Client {
     }
 
     private void observe() {
+        String gameNumber;
         Scanner scanner = new Scanner(System.in);
         String[] words;
         while (true) {
             System.out.println("Please enter the game number you wish to observe. " +
                     "This game number corresponds with the list of games. " +
                     "to view the list again, type 'list'. Or type '..' to return to the main menu");
-            String gameNumber = scanner.nextLine();
+            gameNumber = scanner.nextLine();
             words = gameNumber.split("\\s+");
             if (words.length == 1) {
                 if (gameNumber.equals("list")) {
                     list();
+                    continue;
+                }
+                try {
+                    var gameNum = Integer.parseInt(words[0]);
+                    if (gameNum < 1 || gameNum > gameList.size()) {
+                        System.out.println("Error: entered number is either less than 1 or higher than the amount of games listed. Try again");
+                        continue;
+                    }
+                } catch (Exception e) {
+                    System.err.println("Error: not a number! Please enter a valid number");
                     continue;
                 }
                 break;
@@ -299,12 +321,10 @@ public class Client {
                     " or type 'list' to see the list of games, " +
                     "or type '..' to return to the main menu");
         }
-        // make the call to observe the game - make sure it's from white's view!!
-            // find the game by the game number - similar to join. Except instead of joining,
-        // just print the game.game() and make sure it's from white's view
         try {
-            GameData game = gameList.get(words[0]);
-            System.out.print(game.game());
+            GameData game = gameList.get(Integer.parseInt(gameNumber));
+//            System.out.println(game.game());
+            draw.printBoardFromWhite();
         } catch (Exception e) {
             System.err.println(e.getMessage());
         }
@@ -332,3 +352,6 @@ public class Client {
         }
     }
 }
+
+//issues:
+//- observe can't find game correctly
