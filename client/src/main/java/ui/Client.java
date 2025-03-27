@@ -297,6 +297,9 @@ public class Client {
                     "to view the list again, type 'list'. Or type '..' to return to the main menu");
             gameNumber = scanner.nextLine();
             words = gameNumber.split("\\s+");
+            if (gameNumber.equals("..")) {
+                postLoginMenu(username);
+            }
             if (words.length == 1) {
                 if (gameNumber.equals("list")) {
                     list();
@@ -313,9 +316,6 @@ public class Client {
                     continue;
                 }
                 break;
-            }
-            else if (gameNumber.equals("..")) {
-                postLoginMenu(username);
             }
             System.out.println("Error: too many words. Please input the game number you want to view," +
                     " or type 'list' to see the list of games, " +
