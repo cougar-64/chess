@@ -1,4 +1,5 @@
 package ui;
+import chess.ChessGame;
 import server.ServerFacade;
 import exception.ResponseException;
 import model.*;
@@ -142,7 +143,7 @@ public class Client {
                         list();
                         break;
                     case "join":
-                        join();
+                        join(username);
                         break;
                     case "observe":
                         observe();
@@ -237,7 +238,7 @@ public class Client {
         }
     }
 
-    private void join() {
+    private void join(String username) {
         initGameList();
         if (gameList.size() == 0) {
             System.out.println("There are no current games to join");
@@ -272,12 +273,6 @@ public class Client {
             }
             try {
                 serverFacade.join(authToken, words[0], words[1], gameList);
-                DrawingBoard draw = new DrawingBoard();
-                if (words[1].equals("WHITE")) {
-                    draw.printBoardFromWhite();
-                } else if (words[1].equals("BLACK")) {
-                    draw.printBoardFromBlack();
-                }
                 // this function is done so it defaults back to the post-login menu
                 postLoginMenu(username);
             } catch (ResponseException e) {
@@ -322,8 +317,6 @@ public class Client {
                     "or type '..' to return to the main menu");
         }
         try {
-            GameData game = gameList.get(Integer.parseInt(gameNumber));
-//            System.out.println(game.game());
             draw.printBoardFromWhite();
         } catch (Exception e) {
             System.err.println(e.getMessage());
@@ -351,7 +344,51 @@ public class Client {
             System.err.println(r.getMessage());
         }
     }
-}
 
-//issues:
-//- observe can't find game correctly
+    public void joinedGameMenu(String username, String playerColor) {
+        if (isLoggedIn) {
+            Scanner scanner = new Scanner(System.in);
+            System.out.println("Welcome to the game, " + username + "! You are currently playing as " + playerColor + ". type 'help' to get started");
+            while (true) {
+                String input = scanner.nextLine();
+                switch (input) {
+                    case "help":
+                        joinedHelp();
+                        break;
+                    case "redraw":
+                        joinedRedraw();
+                        break;
+                    case "leave":
+                        joinedLeave();
+                        break;
+                    case "move":
+                        joinedMakeMove();
+                        break;
+                    case "resign":
+                        joinedResign();
+                        break;
+                    case "highlight":
+                        joinedHighlight();
+                        break;
+                    default:
+                        System.out.println("Invalid input! Please type 'help' to get started");
+                }
+            }
+        }
+    }
+
+    private void joinedHelp() {
+        System.out.println("""
+                Please type one of the following:
+                help - see actions you can take
+                redraw - redraws the chessboard with updated information
+                leave - leave the game
+                move - makes a move
+                resign - resign from your current game
+                highlight - highlights all legal moves""");
+    }
+
+    private void joinedRedraw() {
+
+    }
+}

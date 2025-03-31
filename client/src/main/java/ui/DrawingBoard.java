@@ -1,33 +1,44 @@
 package ui;
 
+import chess.ChessBoard;
+import chess.ChessGame;
+import chess.ChessPiece;
+import chess.ChessPosition;
+
 public class DrawingBoard {
     String lightColor = EscapeSequences.SET_BG_COLOR_LIGHT_GREY;
     String darkColor = EscapeSequences.SET_BG_COLOR_DARK_GREY;
     String borderColor = EscapeSequences.SET_BG_COLOR_BLACK;
     String reset = EscapeSequences.RESET_BG_COLOR;
+    ChessBoard chessboard;
+    String[][] board;
 
-    String[][] board = {
-            {EscapeSequences.EMPTY, " a ", " b ", " c ", " d ", " e ", " f ", " g ", " h ", EscapeSequences.EMPTY},
-            {" 8 ", EscapeSequences.BLACK_ROOK, EscapeSequences.BLACK_KNIGHT, EscapeSequences.BLACK_BISHOP, EscapeSequences.BLACK_QUEEN,
-                EscapeSequences.BLACK_KING, EscapeSequences.BLACK_BISHOP, EscapeSequences.BLACK_KNIGHT, EscapeSequences.BLACK_ROOK, " 8 "},
-            {" 7 ", EscapeSequences.BLACK_PAWN, EscapeSequences.BLACK_PAWN, EscapeSequences.BLACK_PAWN, EscapeSequences.BLACK_PAWN,
-                    EscapeSequences.BLACK_PAWN, EscapeSequences.BLACK_PAWN, EscapeSequences.BLACK_PAWN, EscapeSequences.BLACK_PAWN, " 7 "},
-            {" 6 ", EscapeSequences.EMPTY, EscapeSequences.EMPTY, EscapeSequences.EMPTY, EscapeSequences.EMPTY, EscapeSequences.EMPTY,
-                    EscapeSequences.EMPTY, EscapeSequences.EMPTY, EscapeSequences.EMPTY, " 6 "},
-            {" 5 ", EscapeSequences.EMPTY, EscapeSequences.EMPTY, EscapeSequences.EMPTY, EscapeSequences.EMPTY, EscapeSequences.EMPTY,
-                    EscapeSequences.EMPTY, EscapeSequences.EMPTY, EscapeSequences.EMPTY, " 5 "},
-            {" 4 ", EscapeSequences.EMPTY, EscapeSequences.EMPTY, EscapeSequences.EMPTY, EscapeSequences.EMPTY, EscapeSequences.EMPTY,
-                    EscapeSequences.EMPTY, EscapeSequences.EMPTY, EscapeSequences.EMPTY, " 4 "},
-            {" 3 ", EscapeSequences.EMPTY, EscapeSequences.EMPTY, EscapeSequences.EMPTY, EscapeSequences.EMPTY, EscapeSequences.EMPTY,
-                    EscapeSequences.EMPTY, EscapeSequences.EMPTY, EscapeSequences.EMPTY, " 3 "},
-            {" 2 ", EscapeSequences.WHITE_PAWN, EscapeSequences.WHITE_PAWN, EscapeSequences.WHITE_PAWN, EscapeSequences.WHITE_PAWN,
-                    EscapeSequences.WHITE_PAWN, EscapeSequences.WHITE_PAWN, EscapeSequences.WHITE_PAWN, EscapeSequences.WHITE_PAWN, " 2 "},
-            {" 1 ", EscapeSequences.WHITE_ROOK, EscapeSequences.WHITE_KNIGHT, EscapeSequences.WHITE_BISHOP, EscapeSequences.WHITE_QUEEN,
-                    EscapeSequences.WHITE_KING, EscapeSequences.WHITE_BISHOP, EscapeSequences.WHITE_KNIGHT, EscapeSequences.WHITE_ROOK, " 1 "},
-            {EscapeSequences.EMPTY, " a ", " b ", " c ", " d ", " e ", " f ", " g ", " h ", EscapeSequences.EMPTY}
-    };
+    public DrawingBoard(ChessBoard board) {
+        this.chessboard = board;
+        this.board = new String[10][10];
+        initializeBoard();
+    }
+
+    private void initializeBoard() {
+        board[0] = new String[]{EscapeSequences.EMPTY, " a ", " b ", " c ", " d ", " e ", " f ", " g ", " h ", EscapeSequences.EMPTY};
+        board[9] = new String[]{EscapeSequences.EMPTY, " a ", " b ", " c ", " d ", " e ", " f ", " g ", " h ", EscapeSequences.EMPTY};
+        for (int i = 1; i <= 8; i++) {
+            board[i][0] = " " + (9-i) + " ";
+            board[9][i] = " " + (9-i) + " ";
+        }
+    }
+
+    private void updateBoard() {
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                String piece = chessboard.getPiece(new ChessPosition(i, j)).toString();
+                board[i+1][j+1] = (piece == null ? EscapeSequences.EMPTY : piece);
+            }
+        }
+    }
 
     public void printBoardFromWhite() {
+        updateBoard();
         for (int i = 0; i < 10; i++) {
             for (int j = 0; j < 10; j++) {
                 checkBounds(i, j);
@@ -37,19 +48,13 @@ public class DrawingBoard {
     }
 
     public void printBoardFromBlack() {
+        updateBoard();
         for (int i = 9; i >= 0; i--) {
             for (int j = 9; j >= 0; j--) {
                 checkBounds(i, j);
             }
             System.out.println(reset);
         }
-    }
-
-    public static void main(String[] args) {
-        DrawingBoard draw = new DrawingBoard();
-        draw.printBoardFromWhite();
-        System.out.println("\n");
-        draw.printBoardFromBlack();
     }
 
     private void checkBounds(int i, int j) {
