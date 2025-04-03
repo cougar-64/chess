@@ -1,7 +1,11 @@
 package ui.websocket;
 
+import chess.ChessGame;
 import com.google.gson.Gson;
 import exception.ResponseException;
+import model.GameData;
+import server.ServerFacade;
+import ui.DrawingBoard;
 import websocket.commands.*;
 import websocket.messages.*;
 
@@ -12,7 +16,7 @@ import java.net.URISyntaxException;
 
 //need to extend Endpoint for websocket to work properly
 public class WebSocketFacade extends Endpoint {
-
+    UserGameCommand command;
     Session session;
     NotificationHandler notificationHandler;
 
@@ -42,5 +46,15 @@ public class WebSocketFacade extends Endpoint {
     //Endpoint requires this method, but you don't have to do anything
     @Override
     public void onOpen(Session session, EndpointConfig endpointConfig) {
+    }
+
+    public void connect(GameData gameData, String authToken) throws ResponseException {
+        try {
+            command = new UserGameCommand(UserGameCommand.CommandType.CONNECT, authToken, gameData.gameID());
+            this.session.getBasicRemote().sendText(new Gson().toJson(command));
+            this.session.close();
+        } catch (IOException e) {
+            throw new ResponseException(500, e.getMessage());
+        }
     }
 }

@@ -3,19 +3,27 @@ import chess.ChessGame;
 import server.ServerFacade;
 import exception.ResponseException;
 import model.*;
+import ui.websocket.NotificationHandler;
+import ui.websocket.WebSocketFacade;
+import websocket.messages.*;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 
-public class Client {
-    private DrawingBoard draw = new DrawingBoard();
+public class Client implements NotificationHandler {
+    private String url;
+    private WebSocketFacade ws;
+    private NotificationHandler notificationHandler;
+    private DrawingBoard draw;
     private ServerFacade serverFacade;
     private String username;
     private String authToken;
     HashMap<Integer, GameData> gameList = new HashMap<>(); // needed up here to keep a memory of what game was where. Cleared each time list is called
-    public Client(String url) {
+    public Client(String url, NotificationHandler notificationHandler) {
+        this.url = url;
         this.serverFacade = new ServerFacade(url);
+        this.notificationHandler = notificationHandler;
     }
     boolean isLoggedIn = false;
 
@@ -215,6 +223,9 @@ public class Client {
             for (int i = 0; i < listOfGames.games().size(); i++) {
                 gameList.put(i+1, listOfGames.games().get(i));
             }
+            if (gameList.isEmpty()) {
+                System.out.println("There are no current games! Please create a game");
+            }
             for (Map.Entry<Integer, GameData> entry : gameList.entrySet()){
                 GameData game = entry.getValue();
                 System.out.println("Game " + entry.getKey() + ": " + "Game Name: " + game.gameName() + " WHITE: " +
@@ -272,9 +283,11 @@ public class Client {
                 continue;
             }
             try {
-                serverFacade.join(authToken, words[0], words[1], gameList);
-                // this function is done so it defaults back to the post-login menu
-                postLoginMenu(username);
+                GameData game = serverFacade.join(authToken, words[0], words[1], gameList);
+                ws = new WebSocketFacade(url, notificationHandler);
+                ws.connect(game, authToken);
+                // this function is done so it now goes to the joined Menu
+                joinedGameMenu(username, words[1], ws);
             } catch (ResponseException e) {
                 System.err.println(e.getMessage());
                 System.out.println("Please try again");
@@ -345,7 +358,7 @@ public class Client {
         }
     }
 
-    public void joinedGameMenu(String username, String playerColor) {
+    public void joinedGameMenu(String username, String playerColor, WebSocketFacade ws) {
         if (isLoggedIn) {
             Scanner scanner = new Scanner(System.in);
             System.out.println("Welcome to the game, " + username + "! You are currently playing as " + playerColor + ". type 'help' to get started");
@@ -356,19 +369,19 @@ public class Client {
                         joinedHelp();
                         break;
                     case "redraw":
-                        joinedRedraw();
+                        redraw(ws, playerColor);
                         break;
                     case "leave":
-                        joinedLeave();
+                        leave(ws);
                         break;
                     case "move":
-                        joinedMakeMove();
+                        makeMove(ws);
                         break;
                     case "resign":
-                        joinedResign();
+                        resign(ws);
                         break;
                     case "highlight":
-                        joinedHighlight();
+                        highlight(ws);
                         break;
                     default:
                         System.out.println("Invalid input! Please type 'help' to get started");
@@ -388,7 +401,11 @@ public class Client {
                 highlight - highlights all legal moves""");
     }
 
-    private void joinedRedraw() {
+    private void redraw(WebSocketFacade ws, String playerColor) {
 
+    }
+
+    public void notify(Notification notification) {
+        System.out.println(notification.getMessage());
     }
 }

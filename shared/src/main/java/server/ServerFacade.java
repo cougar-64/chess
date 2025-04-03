@@ -50,7 +50,7 @@ public class ServerFacade {
         return makeRequest("GET", path, null, ListGamesResult.class, map);
     }
 
-    public void join(String authToken, String gameNumber, String playerColor, HashMap<Integer, GameData> gameList) throws ResponseException {
+    public GameData join(String authToken, String gameNumber, String playerColor, HashMap<Integer, GameData> gameList) throws ResponseException {
         Map<String, String> map = new HashMap<>();
         map.put("Authorization", authToken);
         int number = Integer.parseInt(gameNumber);
@@ -61,6 +61,7 @@ public class ServerFacade {
         body.put("gameID", game.gameID());
 
         makeRequest("PUT", path, body, null, map);
+        return game;
     }
 
     private <T> T makeRequest(String method, String path, Object request, Class<T> responseClass, Map<String, String> headers)
