@@ -15,7 +15,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 //need to extend Endpoint for websocket to work properly
-public class WebSocketFacade extends Endpoint implements NotificationHandler {
+public class WebSocketFacade extends Endpoint {
     UserGameCommand command;
     Session session;
     NotificationHandler notificationHandler;
@@ -34,9 +34,7 @@ public class WebSocketFacade extends Endpoint implements NotificationHandler {
                 @Override
                 public void onMessage(String message) {
                     ServerMessage notification = new Gson().fromJson(message, ServerMessage.class);
-
-
-                    switch (notification.getServerMessageType()) { // will this actually execute? I think the ServerMessageType will always and forever be 'notification' based on how this is set up
+                    switch (notification.getServerMessageType()) {
                         case LOAD_GAME -> loadGame(message);
                         case NOTIFICATION -> sendNotification(message);
                     }
@@ -56,7 +54,6 @@ public class WebSocketFacade extends Endpoint implements NotificationHandler {
         try {
             command = new UserGameCommand(UserGameCommand.CommandType.CONNECT, authToken, gameData.gameID());
             this.session.getBasicRemote().sendText(new Gson().toJson(command));
-            this.session.close();
         } catch (IOException e) {
             throw new ResponseException(500, e.getMessage());
         }
@@ -77,10 +74,6 @@ public class WebSocketFacade extends Endpoint implements NotificationHandler {
 
     public void sendNotification(String message) {
         Notification notification = new Notification(message);
-        notify(notification);
-    }
-
-    public void notify(Notification notification) {
-        System.out.println(notification.getMessage());
+        notificationHandler.notify(notification);
     }
 }

@@ -22,6 +22,9 @@ public class WebSocketHandler {
     UserGameCommand command;
     private DataAccess dataaccess; // THIS MIGHT NEED TO BE ASSIGNED???
     private ConnectionManager connectionManager = new ConnectionManager();
+    public WebSocketHandler(DataAccess dataaccess) {
+        this.dataaccess = dataaccess;
+    }
 
     @OnWebSocketMessage
     public void onMessage(Session session, String message) {
@@ -31,15 +34,15 @@ public class WebSocketHandler {
             username = getUsername(command.getAuthToken());
             gameID = command.getGameID();
 
-            saveSession(command.getGameID(), session);
-
+            connectionManager.addPlayer(command.getGameID(), command.getAuthToken(), session);
             switch (command.getCommandType()) {
-                case CONNECT -> connect(session, username, (Connect) command);
+                case CONNECT -> connect(session, username, gson.fromJson(message, Connect.class));
                 case MAKE_MOVE -> makeMove(session, username, (MakeMove) command);
                 case LEAVE -> leaveGame(session, username, (Leave) command);
                 case RESIGN -> resign(session, username, (Resign) command);
             }
         } catch (Exception e) {
+            System.err.println(e.getMessage());
         }
     }
 

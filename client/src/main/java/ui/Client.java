@@ -14,16 +14,14 @@ import java.util.Scanner;
 public class Client implements NotificationHandler {
     private String url;
     private WebSocketFacade ws;
-    private NotificationHandler notificationHandler;
     private DrawingBoard draw;
     private ServerFacade serverFacade;
     private String username;
     private String authToken;
     HashMap<Integer, GameData> gameList = new HashMap<>(); // needed up here to keep a memory of what game was where. Cleared each time list is called
-    public Client(String url, NotificationHandler notificationHandler) {
+    public Client(String url) {
         this.url = url;
         this.serverFacade = new ServerFacade(url);
-        this.notificationHandler = notificationHandler;
     }
     boolean isLoggedIn = false;
 
@@ -284,7 +282,7 @@ public class Client implements NotificationHandler {
             }
             try {
                 GameData game = serverFacade.join(authToken, words[0], words[1], gameList);
-                ws = new WebSocketFacade(url, notificationHandler);
+                ws = new WebSocketFacade(url, this);
                 ws.connect(game, authToken);
                 // this function is done so it now goes to the joined Menu
                 joinedGameMenu(username, words[1], ws, game);
@@ -406,4 +404,27 @@ public class Client implements NotificationHandler {
         ws.loadGame(json);
     }
 
+    private void leave (WebSocketFacade ws) {
+
+    }
+
+    private void makeMove(WebSocketFacade ws) {
+
+    }
+
+    private void resign(WebSocketFacade ws) {
+
+    }
+
+    private void highlight(WebSocketFacade ws) {
+
+    }
+
+    public void notify(Notification notification) {
+        System.out.println(notification.getMessage());
+    }
 }
+
+/*
+- currently websocketHandler is not receiving the websocketFacade's message like it should be - breakpoint is never hit
+ */
