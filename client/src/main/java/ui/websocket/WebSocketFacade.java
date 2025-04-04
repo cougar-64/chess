@@ -1,9 +1,11 @@
 package ui.websocket;
 
+import chess.ChessGame;
 import com.google.gson.Gson;
 import exception.ResponseException;
 import model.GameData;
 import server.ConnectionManager;
+import ui.DrawingBoard;
 import websocket.commands.*;
 import websocket.messages.*;
 
@@ -35,7 +37,7 @@ public class WebSocketFacade extends Endpoint {
                     notificationHandler.notify(notification);
 
                     switch (notification.getServerMessageType()) {
-                        case LOAD_GAME -> loadGame();
+                        case LOAD_GAME -> loadGame(message);
                     }
                 }
             });
@@ -56,6 +58,19 @@ public class WebSocketFacade extends Endpoint {
             this.session.close();
         } catch (IOException e) {
             throw new ResponseException(500, e.getMessage());
+        }
+    }
+
+    public void loadGame(String message) {
+        LoadGame loadGameMessage = new Gson().fromJson(message, LoadGame.class);
+        ChessGame game = loadGameMessage.getGame();
+        String playerColor = loadGameMessage.getPlayerColor();
+        DrawingBoard draw = new DrawingBoard(game.getBoard());
+        if (playerColor.equals("BLACK")) {
+            draw.printBoardFromBlack();
+        }
+        else {
+            draw.printBoardFromWhite();
         }
     }
 }

@@ -62,7 +62,7 @@ public class WebSocketHandler {
         connectionManager.addPlayer(gameID, command.getAuthToken(), session);
         String playerColor = isRootClient();
         if (playerColor != null) {
-            ServerMessage loadGameMessage = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME);
+            LoadGame loadGameMessage = new LoadGame(dataaccess.getGame(gameID).game(), playerColor);
             String json = new Gson().toJson(loadGameMessage);
             session.getRemote().sendString(json);
             var observerMessage = String.format("%s joined the game as %s", username, playerColor);
