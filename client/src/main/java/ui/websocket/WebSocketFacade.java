@@ -1,11 +1,8 @@
 package ui.websocket;
 
-import chess.ChessGame;
 import com.google.gson.Gson;
 import exception.ResponseException;
 import model.GameData;
-import server.ServerFacade;
-import ui.DrawingBoard;
 import websocket.commands.*;
 import websocket.messages.*;
 
