@@ -75,4 +75,20 @@ public class WebSocketHandler {
             connectionManager.broadcast(username, notification);
         }
     }
+
+    public void makeMove(Session session, String username, MakeMove command) {
+
+    }
+
+    public void leaveGame(Session session, String username, Leave command) {
+
+    }
+
+    public void resign(Session session, String username, Resign command) {
+
+    }
+
+    public void saveSession(Integer gameID, Session session) {
+
+    }
 }

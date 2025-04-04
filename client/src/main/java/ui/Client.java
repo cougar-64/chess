@@ -1,5 +1,5 @@
 package ui;
-import chess.ChessGame;
+import com.google.gson.Gson;
 import server.ServerFacade;
 import exception.ResponseException;
 import model.*;
@@ -287,7 +287,7 @@ public class Client implements NotificationHandler {
                 ws = new WebSocketFacade(url, notificationHandler);
                 ws.connect(game, authToken);
                 // this function is done so it now goes to the joined Menu
-                joinedGameMenu(username, words[1], ws);
+                joinedGameMenu(username, words[1], ws, game);
             } catch (ResponseException e) {
                 System.err.println(e.getMessage());
                 System.out.println("Please try again");
@@ -358,7 +358,7 @@ public class Client implements NotificationHandler {
         }
     }
 
-    public void joinedGameMenu(String username, String playerColor, WebSocketFacade ws) {
+    public void joinedGameMenu(String username, String playerColor, WebSocketFacade ws, GameData game) {
         if (isLoggedIn) {
             Scanner scanner = new Scanner(System.in);
             System.out.println("Welcome to the game, " + username + "! You are currently playing as " + playerColor + ". type 'help' to get started");
@@ -369,7 +369,7 @@ public class Client implements NotificationHandler {
                         joinedHelp();
                         break;
                     case "redraw":
-                        redraw(ws, playerColor);
+                        redraw(ws, playerColor, game);
                         break;
                     case "leave":
                         leave(ws);
@@ -401,11 +401,9 @@ public class Client implements NotificationHandler {
                 highlight - highlights all legal moves""");
     }
 
-    private void redraw(WebSocketFacade ws, String playerColor) {
-
+    private void redraw(WebSocketFacade ws, String playerColor, GameData game) {
+        String json = new Gson().toJson(new LoadGame(game.game(), playerColor));
+        ws.loadGame(json);
     }
 
-    public void notify(ServerMessage notification) {
-        System.out.println(notification.getMessage());
-    }
 }
