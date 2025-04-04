@@ -405,7 +405,7 @@ public class Client implements NotificationHandler {
 
     }
 
-    public void notify(Notification notification) {
+    public void notify(ServerMessage notification) {
         System.out.println(notification.getMessage());
     }
 }

@@ -18,7 +18,7 @@ public class ConnectionManager {
     public void removePlayer(int gameID, String authToken) {
         ConcurrentHashMap<String, Session> innerMap = sessionMap.get(gameID);
         if (innerMap != null) {
-
+            innerMap.remove(authToken);
         }
     }
 

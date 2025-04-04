@@ -3,6 +3,7 @@ package ui.websocket;
 import com.google.gson.Gson;
 import exception.ResponseException;
 import model.GameData;
+import server.ConnectionManager;
 import websocket.commands.*;
 import websocket.messages.*;
 
@@ -17,7 +18,6 @@ public class WebSocketFacade extends Endpoint {
     Session session;
     NotificationHandler notificationHandler;
 
-
     public WebSocketFacade(String url, NotificationHandler notificationHandler) throws ResponseException {
         try {
             url = url.replace("http", "ws");
@@ -31,8 +31,12 @@ public class WebSocketFacade extends Endpoint {
             this.session.addMessageHandler(new MessageHandler.Whole<String>() {
                 @Override
                 public void onMessage(String message) {
-                    Notification notification = new Gson().fromJson(message, Notification.class);
+                    ServerMessage notification = new Gson().fromJson(message, ServerMessage.class);
                     notificationHandler.notify(notification);
+
+                    switch (notification.getServerMessageType()) {
+                        case LOAD_GAME -> loadGame();
+                    }
                 }
             });
         } catch (DeploymentException | IOException | URISyntaxException ex) {

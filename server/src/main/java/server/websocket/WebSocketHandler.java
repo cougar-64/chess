@@ -2,26 +2,34 @@ package server.websocket;
 
 import com.google.gson.Gson;
 import dataaccess.DataAccess;
-import exception.ResponseException;
+import model.GameData;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
+
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
-import spark.serialization.Serializer;
+import server.ConnectionManager;
 import websocket.commands.*;
-import websocket.messages.*;
+import websocket.messages.LoadGame;
+import websocket.messages.Notification;
+import websocket.messages.ServerMessage;
 
 import java.io.IOException;
-import java.util.Timer;
 
+@WebSocket
 public class WebSocketHandler {
-    private DataAccess dataaccess;
+    private Integer gameID;
+    String username;
+    UserGameCommand command;
+    private DataAccess dataaccess; // THIS MIGHT NEED TO BE ASSIGNED???
+    private ConnectionManager connectionManager = new ConnectionManager();
 
     @OnWebSocketMessage
     public void onMessage(Session session, String message) {
         try {
             Gson gson = new Gson();
-            UserGameCommand command = gson.fromJson(message, UserGameCommand.class);
-            String username = getUsername(command.getAuthToken());
+            command = gson.fromJson(message, UserGameCommand.class);
+            username = getUsername(command.getAuthToken());
+            gameID = command.getGameID();
 
             saveSession(command.getGameID(), session);
 
@@ -32,7 +40,6 @@ public class WebSocketHandler {
                 case RESIGN -> resign(session, username, (Resign) command);
             }
         } catch (Exception e) {
-            
         }
     }
 
@@ -40,7 +47,32 @@ public class WebSocketHandler {
         return dataaccess.getAuthData(authToken).username();
     }
 
-    private void connect(Session session, String username, Connect command) {
+    private String isRootClient() {
+        GameData game = dataaccess.getGame(gameID);
+        if (username.equals(game.blackUsername())) {
+            return "BLACK";
+        }
+        else if (username.equals(game.whiteUsername())) {
+            return "WHITE";
+        }
+        return null;
+    }
 
+    private void connect(Session session, String username, Connect command) throws IOException {
+        connectionManager.addPlayer(gameID, command.getAuthToken(), session);
+        String playerColor = isRootClient();
+        if (playerColor != null) {
+            ServerMessage loadGameMessage = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME);
+            String json = new Gson().toJson(loadGameMessage);
+            session.getRemote().sendString(json);
+            var observerMessage = String.format("%s joined the game as %s", username, playerColor);
+            Notification notification = new Notification(observerMessage);
+            connectionManager.broadcast(username, notification);
+        }
+        else {
+            var observer = String.format("%s joined the game as an observer", username);
+            Notification notification = new Notification(observer);
+            connectionManager.broadcast(username, notification);
+        }
     }
 }
