@@ -328,7 +328,9 @@ public class Client implements NotificationHandler {
                     "or type '..' to return to the main menu");
         }
         try {
-            draw.printBoardFromWhite();
+            GameData game = gameList.get(Integer.parseInt(words[0]));
+            ws = new WebSocketFacade(url, this);
+            ws.connect(game, authToken);
         } catch (Exception e) {
             System.err.println(e.getMessage());
         }
@@ -426,5 +428,8 @@ public class Client implements NotificationHandler {
 }
 
 /*
-- currently websocketHandler is not receiving the websocketFacade's message like it should be - breakpoint is never hit
+ISSUES
+- Chess board isn't printing pretty
+- Logic error when creating, listing, and joining games. When joining games, it will say the color has been taken when it hasn't.
+-
  */

@@ -50,7 +50,7 @@ public class WebSocketHandler {
         return dataaccess.getAuthData(authToken).username();
     }
 
-    private String isRootClient() {
+    private String getPlayerColor() {
         GameData game = dataaccess.getGame(gameID);
         if (username.equals(game.blackUsername())) {
             return "BLACK";
@@ -63,7 +63,7 @@ public class WebSocketHandler {
 
     private void connect(Session session, String username, Connect command) throws IOException {
         connectionManager.addPlayer(gameID, command.getAuthToken(), session);
-        String playerColor = isRootClient();
+        String playerColor = getPlayerColor();
         if (playerColor != null) {
             LoadGame loadGameMessage = new LoadGame(dataaccess.getGame(gameID).game(), playerColor);
             String json = new Gson().toJson(loadGameMessage);
@@ -83,8 +83,22 @@ public class WebSocketHandler {
 
     }
 
-    public void leaveGame(Session session, String username, Leave command) {
-
+    public void leaveGame(Session session, String username, Leave command) throws IOException {
+        String playerColor = getPlayerColor();
+        if (playerColor != null) {
+            GameData game = dataaccess.getGame(gameID);
+            if (playerColor == "WHITE") {
+                dataaccess.updateGameData("WHITE", game, null);
+            }
+            else {
+                dataaccess.updateGameData("BLACK", game, null);
+            }
+        }
+        connectionManager.removePlayer(gameID, command.getAuthToken());
+        var message = String.format("%s has left the game", username);
+        Notification notification = new Notification(message);
+        connectionManager.broadcast(username, notification);
+        session.close();
     }
 
     public void resign(Session session, String username, Resign command) {

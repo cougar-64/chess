@@ -31,7 +31,7 @@ public class DrawingBoard {
     private void updateBoard() {
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
-                String piece = chessboard.getPiece(new ChessPosition(i, j)).toString();
+                String piece = chessboard.getPiece(new ChessPosition(i+1, j+1)).toString();
                 board[i+1][j+1] = (piece == null ? EscapeSequences.EMPTY : piece);
             }
         }
