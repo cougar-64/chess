@@ -331,6 +331,16 @@ public class Client implements NotificationHandler {
             GameData game = gameList.get(Integer.parseInt(words[0]));
             ws = new WebSocketFacade(url, this);
             ws.connect(game, authToken);
+            while (true) {
+                System.out.println("Type 'leave' at any point to leave the game");
+                String input = scanner.nextLine();
+                if (input.equals("leave")) {
+                    leave(ws, game);
+                }
+                else {
+                    System.out.println("Error: could not interpret input");
+                }
+            }
         } catch (Exception e) {
             System.err.println(e.getMessage());
         }
@@ -372,10 +382,10 @@ public class Client implements NotificationHandler {
                         redraw(ws, playerColor, game);
                         break;
                     case "leave":
-                        leave(ws);
+                        leave(ws, game);
                         break;
                     case "move":
-                        makeMove(ws);
+                        makeMove(ws, game);
                         break;
                     case "resign":
                         resign(ws);
@@ -406,12 +416,21 @@ public class Client implements NotificationHandler {
         ws.loadGame(json);
     }
 
-    private void leave (WebSocketFacade ws) {
-
+    private void leave (WebSocketFacade ws, GameData game) {
+        try {
+            ws.leave(game, authToken);
+        } catch (ResponseException e) {
+            System.err.println(e.getMessage());
+        }
     }
 
-    private void makeMove(WebSocketFacade ws) {
-
+    private void makeMove(WebSocketFacade ws, GameData game) {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Please enter the square of the piece you would like to move (i.e. a2)");
+        String startSquare = scanner.nextLine();
+        System.out.println("Enter the square you would like to move your piece to");
+        String endSquare = scanner.nextLine();
+        ws.makeMove(startSquare, endSquare, game, authToken);
     }
 
     private void resign(WebSocketFacade ws) {
@@ -431,5 +450,4 @@ public class Client implements NotificationHandler {
 ISSUES
 - Chess board isn't printing pretty
 - Logic error when creating, listing, and joining games. When joining games, it will say the color has been taken when it hasn't.
--
  */
