@@ -1,4 +1,5 @@
 package ui;
+import chess.InvalidMoveException;
 import com.google.gson.Gson;
 import server.ServerFacade;
 import exception.ResponseException;
@@ -385,7 +386,7 @@ public class Client implements NotificationHandler {
                         leave(ws, game);
                         break;
                     case "move":
-                        makeMove(ws, game);
+                        makeMove(ws, username, playerColor, game);
                         break;
                     case "resign":
                         resign(ws);
@@ -425,12 +426,30 @@ public class Client implements NotificationHandler {
         }
     }
 
-    private void makeMove(WebSocketFacade ws, GameData game) {
+    private void makeMove(WebSocketFacade ws, String username, String playerColor, GameData game) {
+        String startSquare;
+        String endSquare;
         Scanner scanner = new Scanner(System.in);
-        System.out.println("Please enter the square of the piece you would like to move (i.e. a2)");
-        String startSquare = scanner.nextLine();
-        System.out.println("Enter the square you would like to move your piece to");
-        String endSquare = scanner.nextLine();
+        if (!playerColor.equals(game.game().getTeamTurn().toString())) {
+            System.out.println("It's not your turn!");
+            joinedGameMenu(username, playerColor, ws, game);
+        }
+        while (true) {
+            System.out.println("Please enter the square of the piece you would like to move (i.e. a2)");
+            startSquare = scanner.nextLine();
+            if (startSquare.length() == 2) {
+                break;
+            }
+            System.out.println("Please enter a move that is 2 characters long! i.e. a2");
+        }
+        while (true) {
+            System.out.println("Enter the square you would like to move your piece to");
+            endSquare = scanner.nextLine();
+            if (endSquare.length() == 2) {
+                break;
+            }
+            System.out.println("Please enter a move that is 2 characters long! i.e. a2");
+        }
         ws.makeMove(startSquare, endSquare, game, authToken);
     }
 
