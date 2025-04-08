@@ -41,7 +41,7 @@ public class WebSocketHandler {
             connectionManager.addPlayer(command.getGameID(), command.getAuthToken(), session);
             switch (command.getCommandType()) {
                 case CONNECT -> connect(session, username, gson.fromJson(message, Connect.class));
-                case MAKE_MOVE -> makeMove(session, username, gson.fromJson(message, MakeMove.class));
+                case MAKE_MOVE -> makeMove(session, gson.fromJson(message, MakeMove.class));
                 case LEAVE -> leaveGame(session, username, gson.fromJson(message, Leave.class));
                 case RESIGN -> resign(session, username, gson.fromJson(message, Resign.class));
             }
@@ -83,7 +83,7 @@ public class WebSocketHandler {
         }
     }
 
-    public void makeMove(Session session, String username, MakeMove command) throws IOException {
+    public void makeMove(Session session, MakeMove command) throws IOException {
         GameData game = dataaccess.getGame(gameID);
         String startSquare = command.getStartingSquare();
         char colChar = startSquare.charAt(0);
@@ -93,12 +93,6 @@ public class WebSocketHandler {
         char endColChar = endSquare.charAt(0);
         int endRow = Character.getNumericValue(endSquare.charAt(1));
         int endCol = endColChar - 'a' + 1;
-        Collection<ChessMove> moves = game.game().validMoves(new ChessPosition(row, col));
-        for (ChessMove move : moves) {
-            if (new ChessMove(new ChessPosition(row, col), new ChessPosition(endRow, endCol), null).equals(move)) {
-                break;
-            }
-        }
         try {
             game.game().makeMove(new ChessMove(new ChessPosition(row, col), new ChessPosition(endRow, endCol), null));
             dataaccess.updateGame(gameID, game.game());
@@ -107,7 +101,7 @@ public class WebSocketHandler {
             session.getRemote().sendString(json);
         } catch (InvalidMoveException e) {
             websocket.messages.Error error = new websocket.messages.Error(e.getMessage());
-            connectionManager.toClient(username, error);
+            connectionManager.toClient(command.getAuthToken(), error);
         }
 
     }

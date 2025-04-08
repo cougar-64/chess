@@ -37,7 +37,7 @@ public class WebSocketFacade extends Endpoint {
                     switch (notification.getServerMessageType()) {
                         case LOAD_GAME -> loadGame(message);
                         case NOTIFICATION -> sendNotification(message);
-                        case ERROR -> error(message);
+                        case ERROR -> sendError(message);
                     }
                 }
             });
@@ -87,8 +87,9 @@ public class WebSocketFacade extends Endpoint {
         notificationHandler.notify(notification);
     }
 
-    public void error(String message) {
-        System.err.println(message);
+    public void sendError(String message) {
+        websocket.messages.Error error = new websocket.messages.Error(message);
+        notificationHandler.errorify(error);
     }
 
     public void resign(GameData gameData, String authToken) {
@@ -103,9 +104,11 @@ public class WebSocketFacade extends Endpoint {
     public void makeMove(String startSquare, String endSquare, GameData gameData, String authToken) {
         try {
             MakeMove makeMove = new MakeMove(authToken, gameData.gameID(), startSquare, endSquare);
+            command = new UserGameCommand(UserGameCommand.CommandType.MAKE_MOVE, authToken, gameData.gameID());
             this.session.getBasicRemote().sendText(new Gson().toJson(makeMove));
         } catch (IOException e) {
-            System.err.println(e.getMessage());
+            sendError(e.getMessage());
         }
+
     }
 }

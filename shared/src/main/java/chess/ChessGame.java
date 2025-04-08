@@ -88,12 +88,12 @@ public class ChessGame implements Serializable {
         TeamColor otherColor = myColor.opposite();
         ChessPosition start = move.getStartPosition();
         if (board.getPiece(start) == null) {
-            throw new InvalidMoveException();
+            throw new InvalidMoveException("There is no piece at the square you tried to access");
         }
         ChessPosition end = move.getEndPosition();
         ChessPiece oldPiece = currentBoard.getPiece(move.getStartPosition());
         if (!oldPiece.getTeamColor().equals(myColor)) {
-            throw new InvalidMoveException();
+            throw new InvalidMoveException("Your starting square has an enemy piece on it");
         }
         Collection<ChessMove> moves = validMoves(move.getStartPosition());
         for (ChessMove myMove : moves) {
@@ -103,10 +103,7 @@ public class ChessGame implements Serializable {
             }
         }
         if (!isIn) {
-            throw new InvalidMoveException();
-        }
-        if (currentBoard.getPiece(move.getStartPosition()) == null) {
-            throw new InvalidMoveException();
+            throw new InvalidMoveException("You're trying to make an invalid move");
         }
         ChessPiece piece = currentBoard.getPiece(move.getStartPosition());
         if (piece != null) {

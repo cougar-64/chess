@@ -1,13 +1,20 @@
 package websocket.messages;
 
 public class Error extends ServerMessage {
-    private String message;
+    private final String errorMessage;
     public Error(String message) {
         super(ServerMessageType.ERROR);
-        this.message = message;
+        this.errorMessage = message;
     }
 
     public String getMessage() {
-        return message;
+        return errorMessage;
+    }
+
+    @Override
+    public String toString() {
+        return "Error{" +
+                "errorMessage='" + errorMessage + '\'' +
+                '}';
     }
 }

@@ -464,6 +464,10 @@ public class Client implements NotificationHandler {
     public void notify(Notification notification) {
         System.out.println(notification.getMessage());
     }
+
+    public void errorify(websocket.messages.Error error) {
+        System.out.println(error.getMessage());
+    }
 }
 
 /*
