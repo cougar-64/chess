@@ -33,4 +33,16 @@ public class ConnectionManager {
             }
         }
     }
+
+    public void toClient(String player, websocket.messages.Error error) throws IOException {
+        for (var gameSessions : sessionMap.values()) {
+            for (var playerSessionEntry : gameSessions.entrySet()) {
+                String authToken = playerSessionEntry.getKey();
+                Session session = playerSessionEntry.getValue();
+                if (session.isOpen() && authToken.equals(player)) {
+                    session.getRemote().sendString(new Gson().toJson(error));
+                }
+            }
+        }
+    }
 }

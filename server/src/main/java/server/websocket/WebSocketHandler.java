@@ -17,6 +17,7 @@ import websocket.messages.*;
 
 
 import java.io.IOException;
+import java.util.Collection;
 
 @WebSocket
 public class WebSocketHandler {
@@ -82,7 +83,7 @@ public class WebSocketHandler {
         }
     }
 
-    public void makeMove(Session session, String username, MakeMove command) {
+    public void makeMove(Session session, String username, MakeMove command) throws IOException {
         GameData game = dataaccess.getGame(gameID);
         String startSquare = command.getStartingSquare();
         char colChar = startSquare.charAt(0);
@@ -92,12 +93,22 @@ public class WebSocketHandler {
         char endColChar = endSquare.charAt(0);
         int endRow = Character.getNumericValue(endSquare.charAt(1));
         int endCol = endColChar = 'a' + 1;
+        Collection<ChessMove> moves = game.game().validMoves(new ChessPosition(row, col));
+        for (ChessMove move : moves) {
+            if (new ChessMove(new ChessPosition(row, col), new ChessPosition(endRow, endCol), null).equals(move)) {
+                break;
+            }
+        }
         try {
             game.game().makeMove(new ChessMove(new ChessPosition(row, col), new ChessPosition(endRow, endCol), null));
+            LoadGame loadGameMessage = new LoadGame(dataaccess.getGame(gameID).game(), getPlayerColor());
+            String json = new Gson().toJson(loadGameMessage);
+            session.getRemote().sendString(json);
         } catch (InvalidMoveException e) {
-            websocket.messages.Error error = new websocket.messages.Error();
-
+            websocket.messages.Error error = new websocket.messages.Error(e.getMessage());
+            connectionManager.toClient(username, error);
         }
+
     }
 
     public void leaveGame(Session session, String username, Leave command) throws IOException {
