@@ -101,7 +101,7 @@ public class WebSocketHandler {
         }
         try {
             game.game().makeMove(new ChessMove(new ChessPosition(row, col), new ChessPosition(endRow, endCol), null));
-            System.out.print(game.game().getBoard().toString()); // the board updates!! prints out correctly
+            dataaccess.updateGame(gameID, game.game());
             LoadGame loadGameMessage = new LoadGame(dataaccess.getGame(gameID).game(), getPlayerColor());
             String json = new Gson().toJson(loadGameMessage);
             session.getRemote().sendString(json);

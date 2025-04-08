@@ -1,13 +1,15 @@
 package dataaccess;
 import java.util.*;
 
+import chess.ChessGame;
 import chess.ChessPiece;
+import chess.ChessPosition;
 import model.*;
 
 public class InMemoryDA extends DatabaseManager implements DataAccess {
     private final HashMap<String, UserData> user = new HashMap<>(); // takes username paired with UserData
     private final HashMap<String, List<AuthData>> auth = new HashMap<>(); // takes authToken paired with AuthData
-    private final HashMap<String, GameData> games = new HashMap<>(); // takes gameName paired with GameData
+    private final HashMap<Integer, GameData> games = new HashMap<>(); // takes gameName paired with GameData
 
     public UserData getUser(String username) {
         return user.get(username);
@@ -51,7 +53,7 @@ public class InMemoryDA extends DatabaseManager implements DataAccess {
 
     public ArrayList<GameData> listGames() {
         ArrayList<GameData> allGames = new ArrayList<>();
-        for (HashMap.Entry<String, GameData> entry : games.entrySet()) {
+        for (HashMap.Entry<Integer, GameData> entry : games.entrySet()) {
             allGames.add(entry.getValue());
         }
         return allGames;
@@ -60,26 +62,12 @@ public class InMemoryDA extends DatabaseManager implements DataAccess {
     public GameData createGame(String gameName) {
         int gameID = createRandomInt();
         GameData g = new GameData(gameID, null, null, gameName, null);
-        games.put(gameName, g);
+        games.put(gameID, g);
         return g;
     }
 
     public GameData getGame(int gameID) {
-        for (HashMap.Entry<String, GameData> game : games.entrySet()) {
-            if (game.getValue().gameID() == gameID) {
-                return game.getValue();
-            }
-        }
-        return null;
-    }
-
-    private void deleteGameDuringUpdate(int gameID) {
-        for (Iterator<HashMap.Entry<String, GameData>> iterator = games.entrySet().iterator(); iterator.hasNext(); ) {
-            Map.Entry<String, GameData> entry = iterator.next();
-            if (entry.getValue().gameID() == (gameID)) {
-                iterator.remove();
-            }
-        }
+        return games.getOrDefault(gameID, null);
     }
 
     public void updateGameData(String playerColor, GameData game, String username) {
@@ -90,8 +78,7 @@ public class InMemoryDA extends DatabaseManager implements DataAccess {
         else {
             newGame = new GameData(game.gameID(), game.whiteUsername(), username, game.gameName(), game.game());
         }
-        deleteGameDuringUpdate(game.gameID());
-        games.put(game.gameName(), newGame);
+        games.put(game.gameID(), newGame);
     }
 
     public void deleteFullDataBase() {
@@ -124,7 +111,12 @@ public class InMemoryDA extends DatabaseManager implements DataAccess {
         /**
          * For testing purposes only!! Has no effect on the actual product
          */
-        games.put(game.gameName(), game);
+        games.put(game.gameID(), game);
     }
 
+    public void updateGame(int gameID, ChessGame game) {
+        GameData gameData = getGame(gameID);
+        GameData updatedGame = new GameData(gameID, gameData.whiteUsername(), gameData.blackUsername(), gameData.gameName(), game);
+        games.put(gameID, updatedGame);
+    }
 }

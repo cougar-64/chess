@@ -1,9 +1,8 @@
 package dataaccess;
 import chess.ChessGame;
+import com.google.gson.Gson;
 import model.*;
-import org.mindrot.jbcrypt.BCrypt;
 
-import java.io.*;
 import java.util.*;
 import java.sql.*;
 
@@ -56,7 +55,7 @@ public class MySQLDataBase extends DatabaseManager implements DataAccess {
                 white_username VARCHAR(50),
                 black_username VARCHAR(50),
                 game_name VARCHAR(50),
-                game BLOB NOT NULL
+                game JSON NOT NULL
                 )
                 """;
 
@@ -213,7 +212,7 @@ public class MySQLDataBase extends DatabaseManager implements DataAccess {
             PreparedStatement getGame = conn.prepareStatement(getGameList)) {
             ResultSet gameSet = getGame.executeQuery();
             while (gameSet.next()) {
-                ChessGame game = deserializeGame(gameSet.getBytes("game"));
+                ChessGame game = deserializeGame(gameSet.getString("game"));
                 GameData newGame = new GameData(
                         gameSet.getInt("game_id"),
                         gameSet.getString("white_username"),
@@ -230,32 +229,11 @@ public class MySQLDataBase extends DatabaseManager implements DataAccess {
         }
     }
 
-    private static ChessGame deserializeGame(byte[] gameBytes) {
-        if (gameBytes == null) {
+    private static ChessGame deserializeGame(String gameJson) {
+        if (gameJson == null) {
             return null;
         }
-        try (ByteArrayInputStream bis = new ByteArrayInputStream(gameBytes);
-             ObjectInputStream ois = new ObjectInputStream(bis)) {
-            return (ChessGame) ois.readObject();
-        } catch (IOException | ClassNotFoundException e) {
-            System.err.println(e.getMessage());
-            return null;
-        }
-    }
-
-    private static byte[] serializeGame(ChessGame game) {
-        if (game == null) {
-            return null;
-        }
-        try (ByteArrayOutputStream bos = new ByteArrayOutputStream();
-             ObjectOutputStream oos = new ObjectOutputStream(bos)) {
-            oos.writeObject(game);  // Serialize the ChessGame object
-            oos.flush();
-            return bos.toByteArray();  // Return the byte array
-        } catch (IOException e) {
-            System.err.println(e.getMessage());
-            return null;
-        }
+        return new Gson().fromJson(gameJson, ChessGame.class);
     }
 
     public GameData createGame(String gameName) {
@@ -265,14 +243,13 @@ public class MySQLDataBase extends DatabaseManager implements DataAccess {
                 black_username, game_name, game)
                 VALUES (?, ?, ?, ?, ?)""";
         ChessGame chessGame = new ChessGame();
-        byte[] serializedGame = serializeGame(chessGame);
         try (Connection conn = DatabaseManager.getConnection();
             PreparedStatement game = conn.prepareStatement(createGame)) {
             game.setInt(1, randInt);
             game.setString(2, null);
             game.setString(3, null);
             game.setString(4, gameName);
-            game.setObject(5, serializedGame);
+            game.setString(5, serializeGame(chessGame));
             int inserted = game.executeUpdate();
             didDatabaseExecute(inserted);
             return new GameData(randInt, null, null, gameName, chessGame);
@@ -305,7 +282,7 @@ public class MySQLDataBase extends DatabaseManager implements DataAccess {
             gameStatement.setInt(1,gameID);
             ResultSet gameResult = gameStatement.executeQuery();
             if (gameResult.next()) {
-                ChessGame game = deserializeGame(gameResult.getBytes("game"));
+                ChessGame game = deserializeGame(gameResult.getString("game"));
                 return new GameData(
                         gameID,
                         gameResult.getString("white_username"),
@@ -405,11 +382,12 @@ public class MySQLDataBase extends DatabaseManager implements DataAccess {
                 VALUES = (?, ?, ?, ?, ?)""";
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement game = conn.prepareStatement(createGame)) {
+            String gameJson = serializeGame(existingGame.game());
             game.setInt(1, existingGame.gameID());
             game.setString(2, existingGame.whiteUsername());
             game.setString(3, existingGame.blackUsername());
             game.setString(4, existingGame.gameName());
-            game.setObject(5, existingGame.game());
+            game.setString(5, gameJson);
             int inserted = game.executeUpdate();
             didDatabaseExecute(inserted);
         } catch (SQLException | DataAccessException e) {
@@ -421,5 +399,25 @@ public class MySQLDataBase extends DatabaseManager implements DataAccess {
         if (success == 0) {
             throw new DataAccessException("insert/update/delete failed");
         }
+    }
+
+    public void updateGame(int gameID, ChessGame game) {
+        String updateGame = """
+                UPDATE gameData
+                SET game = ?
+                WHERE gameID = ?""";
+        try (Connection conn = DatabaseManager.getConnection();
+            PreparedStatement update = conn.prepareStatement(updateGame)) {
+            update.setString(1, serializeGame(game));
+            update.setInt(2, gameID);
+            int inserted = update.executeUpdate();
+            didDatabaseExecute(inserted);
+        } catch (SQLException | DataAccessException e) {
+            System.err.println(e.getMessage());
+        }
+    }
+
+    private String serializeGame(ChessGame game) {
+        return new Gson().toJson(game);
     }
 }

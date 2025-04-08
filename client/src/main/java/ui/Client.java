@@ -204,7 +204,7 @@ public class Client implements NotificationHandler {
                     "or type '..' to return to the main menu");
         }
         try {
-            GameData game = serverFacade.create(authToken, words[0]);
+            serverFacade.create(authToken, words[0]);
             System.out.println("successfully created");
             // this function is now finished, it will return to the post-login menu
             postLoginMenu(username);
@@ -224,7 +224,7 @@ public class Client implements NotificationHandler {
             if (gameList.isEmpty()) {
                 System.out.println("There are no current games! Please create a game");
             }
-            for (Map.Entry<Integer, GameData> entry : gameList.entrySet()){
+            for (Map.Entry<Integer, GameData> entry : gameList.entrySet()) {
                 GameData game = entry.getValue();
                 System.out.println("Game " + entry.getKey() + ": " + "Game Name: " + game.gameName() + " WHITE: " +
                         game.whiteUsername() + ", BLACK:" + game.blackUsername());
