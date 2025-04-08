@@ -92,7 +92,7 @@ public class WebSocketHandler {
         String endSquare = command.getEndingSquare();
         char endColChar = endSquare.charAt(0);
         int endRow = Character.getNumericValue(endSquare.charAt(1));
-        int endCol = endColChar = 'a' + 1;
+        int endCol = endColChar - 'a' + 1;
         Collection<ChessMove> moves = game.game().validMoves(new ChessPosition(row, col));
         for (ChessMove move : moves) {
             if (new ChessMove(new ChessPosition(row, col), new ChessPosition(endRow, endCol), null).equals(move)) {
@@ -101,6 +101,7 @@ public class WebSocketHandler {
         }
         try {
             game.game().makeMove(new ChessMove(new ChessPosition(row, col), new ChessPosition(endRow, endCol), null));
+            System.out.print(game.game().getBoard().toString()); // the board updates!! prints out correctly
             LoadGame loadGameMessage = new LoadGame(dataaccess.getGame(gameID).game(), getPlayerColor());
             String json = new Gson().toJson(loadGameMessage);
             session.getRemote().sendString(json);

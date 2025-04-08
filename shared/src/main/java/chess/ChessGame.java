@@ -121,6 +121,7 @@ public class ChessGame implements Serializable {
             currentBoard.squares[end.getRow() - 1][end.getColumn() - 1] = piece;
         }
         currentBoard.squares[start.getRow() - 1][start.getColumn() - 1] = null;
+        setBoard(currentBoard);
         setTeamTurn(otherColor);
     }
 
