@@ -405,7 +405,7 @@ public class MySQLDataBase extends DatabaseManager implements DataAccess {
         String updateGame = """
                 UPDATE gameData
                 SET game = ?
-                WHERE gameID = ?""";
+                WHERE game_ID = ?""";
         try (Connection conn = DatabaseManager.getConnection();
             PreparedStatement update = conn.prepareStatement(updateGame)) {
             update.setString(1, serializeGame(game));

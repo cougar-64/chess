@@ -9,7 +9,7 @@ import model.*;
 public class InMemoryDA extends DatabaseManager implements DataAccess {
     private final HashMap<String, UserData> user = new HashMap<>(); // takes username paired with UserData
     private final HashMap<String, List<AuthData>> auth = new HashMap<>(); // takes authToken paired with AuthData
-    private final HashMap<Integer, GameData> games = new HashMap<>(); // takes gameName paired with GameData
+    private final HashMap<Integer, GameData> games = new HashMap<>(); // takes gameID paired with GameData
 
     public UserData getUser(String username) {
         return user.get(username);
