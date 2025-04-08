@@ -419,6 +419,7 @@ public class Client implements NotificationHandler {
     private void leave (WebSocketFacade ws, GameData game) {
         try {
             ws.leave(game, authToken);
+            postLoginMenu(username);
         } catch (ResponseException e) {
             System.err.println(e.getMessage());
         }
