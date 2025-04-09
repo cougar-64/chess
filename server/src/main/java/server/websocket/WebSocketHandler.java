@@ -72,11 +72,7 @@ public class WebSocketHandler {
         connectionManager.addPlayer(gameID, command.getAuthToken(), session);
         String playerColor = getPlayerColor(); // returns isOpen() = false
         if (playerColor != null) {
-            LoadGame loadGameMessage = new LoadGame(dataaccess.getGame(gameID).game());
-            String json = new Gson().toJson(loadGameMessage);
-//            System.out.println("Attempting to send message...");
-//            System.out.println("Is session open? " + session.isOpen());
-            session.getRemote().sendString(json);
+
             var observerMessage = String.format("%s joined the game as %s", username, playerColor);
             Notification notification = new Notification(observerMessage);
             connectionManager.broadcast(command.getAuthToken(), notification);
@@ -86,6 +82,9 @@ public class WebSocketHandler {
             Notification notification = new Notification(observer);
             connectionManager.broadcast(command.getAuthToken(), notification);
         }
+        LoadGame loadGameMessage = new LoadGame(dataaccess.getGame(gameID).game());
+        String json = new Gson().toJson(loadGameMessage);
+        session.getRemote().sendString(json);
     }
 
     public void makeMove(Session session, MakeMove command) throws IOException {
