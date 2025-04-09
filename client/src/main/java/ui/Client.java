@@ -1,4 +1,5 @@
 package ui;
+import chess.ChessGame;
 import chess.InvalidMoveException;
 import com.google.gson.Gson;
 import server.ServerFacade;
@@ -16,6 +17,7 @@ public class Client implements NotificationHandler {
     private String url;
     private WebSocketFacade ws;
     private DrawingBoard draw;
+    private String playerColor;
     private ServerFacade serverFacade;
     private String username;
     private String authToken;
@@ -283,6 +285,12 @@ public class Client implements NotificationHandler {
                 continue;
             }
             try {
+                if (words[1].equals("WHITE")) {
+                    playerColor = "WHITE";
+                }
+                else if (words[1].equals("BLACK")) {
+                    playerColor = "BLACK";
+                }
                 GameData game = serverFacade.join(authToken, words[0], words[1], gameList);
                 ws = new WebSocketFacade(url, this);
                 ws.connect(game, authToken);
@@ -334,6 +342,7 @@ public class Client implements NotificationHandler {
             GameData game = gameList.get(Integer.parseInt(words[0]));
             ws = new WebSocketFacade(url, this);
             ws.connect(game, authToken);
+            playerColor = "WHITE";
             while (true) {
                 System.out.println("Type 'leave' at any point to leave the game");
                 String input = scanner.nextLine();
@@ -481,6 +490,16 @@ public class Client implements NotificationHandler {
 
     public void errorify(websocket.messages.Error error) {
         System.out.println(error.getMessage());
+    }
+
+    public void loadGamify(LoadGame loadGame) {
+        ChessGame game = loadGame.getGame();
+        if (playerColor.equals("WHITE")) {
+            draw.printBoardFromWhite();
+        }
+        else {
+            draw.printBoardFromBlack();
+        }
     }
 }
 

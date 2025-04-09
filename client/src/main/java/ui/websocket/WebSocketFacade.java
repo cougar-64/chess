@@ -70,15 +70,7 @@ public class WebSocketFacade extends Endpoint {
 
     public void loadGame(String message) {
         LoadGame loadGameMessage = new Gson().fromJson(message, LoadGame.class);
-        ChessGame game = loadGameMessage.getGame();
-        String playerColor = "WHITE";
-        DrawingBoard draw = new DrawingBoard(game.getBoard());
-        if (playerColor.equals("BLACK")) {
-            draw.printBoardFromBlack();
-        }
-        else {
-            draw.printBoardFromWhite();
-        }
+        notificationHandler.loadGamify(loadGameMessage);
     }
 
     public void sendNotification(String message) {
