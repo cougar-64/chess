@@ -207,6 +207,7 @@ public class Client implements NotificationHandler {
         try {
             serverFacade.create(authToken, words[0]);
             System.out.println("successfully created");
+            list();
             // this function is now finished, it will return to the post-login menu
             postLoginMenu(username);
         } catch (ResponseException e) {
@@ -220,7 +221,7 @@ public class Client implements NotificationHandler {
         try {
             ListGamesResult listOfGames = serverFacade.listGames(authToken);
             for (int i = 0; i < listOfGames.games().size(); i++) {
-                gameList.put(i+1, listOfGames.games().get(i));
+                gameList.put(i, listOfGames.games().get(i));
             }
             if (gameList.isEmpty()) {
                 System.out.println("There are no current games! Please create a game");
@@ -237,20 +238,20 @@ public class Client implements NotificationHandler {
         }
     }
 
-    private void initGameList() {
-        try {
-            ListGamesResult listOfGames = serverFacade.listGames(authToken);
-            for (int i = 1; i < listOfGames.games().size(); i++) {
-                gameList.put(i, listOfGames.games().get(i));
-            }
-        } catch (ResponseException e) {
-            System.err.println(e.getMessage());
-        }
-    }
+//    private void initGameList() {
+//        try {
+//            ListGamesResult listOfGames = serverFacade.listGames(authToken);
+//            for (int i = 1; i < listOfGames.games().size(); i++) {
+//                gameList.put(i, listOfGames.games().get(i));
+//            }
+//        } catch (ResponseException e) {
+//            System.err.println(e.getMessage());
+//        }
+//    }
 
     private void join(String username) {
-        initGameList();
-        if (gameList.size() == 0) {
+//        initGameList();
+        if (gameList.isEmpty()) {
             System.out.println("There are no current games to join");
             System.out.println("Automatically redirecting to create a game...");
             create();
@@ -273,7 +274,7 @@ public class Client implements NotificationHandler {
             }
             try {
                 var gameNum = Integer.parseInt(words[0]);
-                if (gameNum < 1 || gameNum > gameList.size()) {
+                if (gameNum < 0 || gameNum > gameList.size()) {
                     System.out.println("Error: entered number is either less than 1 or higher than the amount of games listed. Try again");
                     continue;
                 }
@@ -314,7 +315,7 @@ public class Client implements NotificationHandler {
                 }
                 try {
                     var gameNum = Integer.parseInt(words[0]);
-                    if (gameNum < 1 || gameNum > gameList.size()) {
+                    if (gameNum < 0 || gameNum > gameList.size()) {
                         System.out.println("Error: entered number is either less than 1 or higher than the amount of games listed. Try again");
                         continue;
                     }
@@ -486,6 +487,5 @@ public class Client implements NotificationHandler {
 ISSUES
 - Chess board isn't printing pretty
 - Logic error when creating, listing, and joining games. When joining games, it will say the color has been taken when it hasn't.
-- need to implement logic for promoting a pawn - makeMove takes in a promotion piece, and is restricted to Queen, Rook, Knight, or Bishop
 - what if observer views multiple games at once? (might actually already be covered)
  */

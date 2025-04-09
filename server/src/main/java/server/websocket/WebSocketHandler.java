@@ -72,8 +72,8 @@ public class WebSocketHandler {
     }
 
     private void connect(Session session, String username, Connect command) throws IOException {
-//        connectionManager.addPlayer(gameID, command.getAuthToken(), session);
-        String playerColor = getPlayerColor();
+        connectionManager.addPlayer(gameID, command.getAuthToken(), session);
+        String playerColor = getPlayerColor(); // session.isOpen() becomes false on this line in the test (after code changed it also fails on line 78) - similarities are: using dataaccess, gameID, leaving the function temporarily
         if (playerColor != null) {
             LoadGame loadGameMessage = new LoadGame(dataaccess.getGame(gameID).game(), playerColor);
             String json = new Gson().toJson(loadGameMessage);
