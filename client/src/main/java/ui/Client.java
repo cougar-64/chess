@@ -238,19 +238,19 @@ public class Client implements NotificationHandler {
         }
     }
 
-//    private void initGameList() {
-//        try {
-//            ListGamesResult listOfGames = serverFacade.listGames(authToken);
-//            for (int i = 1; i < listOfGames.games().size(); i++) {
-//                gameList.put(i, listOfGames.games().get(i));
-//            }
-//        } catch (ResponseException e) {
-//            System.err.println(e.getMessage());
-//        }
-//    }
+    private void initGameList() {
+        try {
+            ListGamesResult listOfGames = serverFacade.listGames(authToken);
+            for (int i = 1; i < listOfGames.games().size(); i++) {
+                gameList.put(i, listOfGames.games().get(i));
+            }
+        } catch (ResponseException e) {
+            System.err.println(e.getMessage());
+        }
+    }
 
     private void join(String username) {
-//        initGameList();
+        initGameList();
         if (gameList.isEmpty()) {
             System.out.println("There are no current games to join");
             System.out.println("Automatically redirecting to create a game...");
@@ -296,6 +296,7 @@ public class Client implements NotificationHandler {
     }
 
     private void observe() {
+        initGameList();
         String gameNumber;
         Scanner scanner = new Scanner(System.in);
         String[] words;
@@ -316,7 +317,7 @@ public class Client implements NotificationHandler {
                 try {
                     var gameNum = Integer.parseInt(words[0]);
                     if (gameNum < 0 || gameNum > gameList.size()) {
-                        System.out.println("Error: entered number is either less than 1 or higher than the amount of games listed. Try again");
+                        System.out.println("Error: entered number is either less than 0 or higher than the amount of games listed. Try again");
                         continue;
                     }
                 } catch (Exception e) {
@@ -414,7 +415,7 @@ public class Client implements NotificationHandler {
     }
 
     private void redraw(WebSocketFacade ws, String playerColor, GameData game) {
-        String json = new Gson().toJson(new LoadGame(game.game(), playerColor));
+        String json = new Gson().toJson(new LoadGame(game.game()));
         ws.loadGame(json);
     }
 

@@ -5,7 +5,6 @@ import chess.ChessPiece;
 import com.google.gson.Gson;
 import exception.ResponseException;
 import model.GameData;
-import server.ConnectionManager;
 import ui.DrawingBoard;
 import websocket.commands.*;
 import websocket.messages.*;
@@ -72,7 +71,7 @@ public class WebSocketFacade extends Endpoint {
     public void loadGame(String message) {
         LoadGame loadGameMessage = new Gson().fromJson(message, LoadGame.class);
         ChessGame game = loadGameMessage.getGame();
-        String playerColor = loadGameMessage.getPlayerColor();
+        String playerColor = "WHITE";
         DrawingBoard draw = new DrawingBoard(game.getBoard());
         if (playerColor.equals("BLACK")) {
             draw.printBoardFromBlack();

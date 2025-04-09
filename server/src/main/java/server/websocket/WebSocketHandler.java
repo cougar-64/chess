@@ -11,14 +11,11 @@ import org.eclipse.jetty.websocket.api.annotations.OnWebSocketClose;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
-import server.ConnectionManager;
-import server.Server;
 import websocket.commands.*;
 import websocket.messages.*;
 
 
 import java.io.IOException;
-import java.util.Collection;
 
 @WebSocket
 public class WebSocketHandler {
@@ -73,12 +70,12 @@ public class WebSocketHandler {
 
     private void connect(Session session, String username, Connect command) throws IOException {
         connectionManager.addPlayer(gameID, command.getAuthToken(), session);
-        String playerColor = getPlayerColor(); // session.isOpen() becomes false on this line in the test (after code changed it also fails on line 78) - similarities are: using dataaccess, gameID, leaving the function temporarily
+        String playerColor = getPlayerColor(); // returns isOpen() = false
         if (playerColor != null) {
-            LoadGame loadGameMessage = new LoadGame(dataaccess.getGame(gameID).game(), playerColor);
+            LoadGame loadGameMessage = new LoadGame(dataaccess.getGame(gameID).game());
             String json = new Gson().toJson(loadGameMessage);
-            System.out.println("Attempting to send message...");
-            System.out.println("Is session open? " + session.isOpen());
+//            System.out.println("Attempting to send message...");
+//            System.out.println("Is session open? " + session.isOpen());
             session.getRemote().sendString(json);
             var observerMessage = String.format("%s joined the game as %s", username, playerColor);
             Notification notification = new Notification(observerMessage);
@@ -104,7 +101,7 @@ public class WebSocketHandler {
         try {
             game.game().makeMove(new ChessMove(new ChessPosition(row, col), new ChessPosition(endRow, endCol), command.getPromotionPiece()));
             dataaccess.updateGame(gameID, game.game());
-            LoadGame loadGameMessage = new LoadGame(dataaccess.getGame(gameID).game(), getPlayerColor());
+            LoadGame loadGameMessage = new LoadGame(dataaccess.getGame(gameID).game());
             connectionManager.loadGameForAll(loadGameMessage);
         } catch (InvalidMoveException e) {
             websocket.messages.Error error = new websocket.messages.Error(e.getMessage());
