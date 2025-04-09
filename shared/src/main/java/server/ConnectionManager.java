@@ -2,6 +2,7 @@ package server;
 
 import com.google.gson.Gson;
 import org.eclipse.jetty.websocket.api.Session;
+import websocket.messages.LoadGame;
 import websocket.messages.Notification;
 
 import java.io.IOException;
@@ -45,4 +46,13 @@ public class ConnectionManager {
             }
         }
     }
-}
+
+    public void loadGameForAll(LoadGame loadGame) throws IOException {
+        for (var gameSessions : sessionMap.values()) {
+            for (var playerSessionEntry : gameSessions.entrySet()) {
+                Session session = playerSessionEntry.getValue();
+                    session.getRemote().sendString(new Gson().toJson(loadGame));
+                }
+            }
+        }
+    }

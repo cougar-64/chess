@@ -96,11 +96,9 @@ public class Server {
     }
 
     private Object joinGame(Request req, Response res) throws ResponseException {
-        System.out.println("first line");
             String authToken = req.headers("authorization");
             var info = new Gson().fromJson(req.body(), Map.class);
             String playerColor = (String) info.get("playerColor");
-            System.out.println(info);
             if (info.get("gameID") == null) {
                 throw new ResponseException(400, "Error: bad request");
             }

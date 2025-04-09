@@ -14,6 +14,7 @@ import java.util.Collection;
 public class ChessGame implements Serializable {
     protected ChessBoard board = new ChessBoard();
     protected TeamColor teamColor = TeamColor.WHITE;
+    private boolean isOver = false;
 
     public ChessGame() {
         board.resetBoard();
@@ -82,6 +83,9 @@ public class ChessGame implements Serializable {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
+        if (isOver) {
+            throw new InvalidMoveException("the game is over! Go home!");
+        }
         boolean isIn = false;
         ChessBoard currentBoard = getBoard();
         TeamColor myColor = getTeamTurn();
@@ -178,6 +182,7 @@ public class ChessGame implements Serializable {
             Collection<ChessMove> moves = new ArrayList<>();
             sizeMove(moves, teamColor);
             if (moves.isEmpty()) {
+                isOver = true;
                 return true;
             }
         }
@@ -196,6 +201,7 @@ public class ChessGame implements Serializable {
             Collection<ChessMove> moves = new ArrayList<>();
             sizeMove(moves, teamColor);
             if (moves.isEmpty()) {
+                isOver = true;
                 return true;
             }
         }
@@ -272,5 +278,16 @@ public class ChessGame implements Serializable {
      */
     public ChessBoard getBoard() {
         return board;
+    }
+
+    public void setOver() {
+        isOver = true;
+    }
+
+    public boolean isItOver() {
+        if (isOver == true) {
+            return true;
+        }
+        return false;
     }
 }

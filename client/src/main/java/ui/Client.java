@@ -389,7 +389,7 @@ public class Client implements NotificationHandler {
                         makeMove(ws, username, playerColor, game);
                         break;
                     case "resign":
-                        resign(ws);
+                        resign(ws, authToken, game);
                         break;
                     case "highlight":
                         highlight(ws);
@@ -453,8 +453,8 @@ public class Client implements NotificationHandler {
         ws.makeMove(startSquare, endSquare, game, authToken);
     }
 
-    private void resign(WebSocketFacade ws) {
-
+    private void resign(WebSocketFacade ws, String authToken, GameData gameData) {
+        ws.resign(gameData, authToken);
     }
 
     private void highlight(WebSocketFacade ws) {
@@ -474,4 +474,5 @@ public class Client implements NotificationHandler {
 ISSUES
 - Chess board isn't printing pretty
 - Logic error when creating, listing, and joining games. When joining games, it will say the color has been taken when it hasn't.
+- need to implement logic for promoting a pawn - makeMove takes in a promotion piece, and is restricted to Queen, Rook, Knight, or Bishop
  */

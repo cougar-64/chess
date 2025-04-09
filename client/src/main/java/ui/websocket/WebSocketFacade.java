@@ -24,8 +24,7 @@ public class WebSocketFacade extends Endpoint {
         try {
             url = url.replace("http", "ws");
             URI socketURI = new URI(url + "/ws");
-            this.notificationHandler = notificationHandler;
-
+            this.notificationHandler = notificationHandler;System.out.println("Connecting to WebSocket at: " + socketURI);
             WebSocketContainer container = ContainerProvider.getWebSocketContainer();
             this.session = container.connectToServer(this, socketURI);
 
