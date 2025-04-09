@@ -429,6 +429,7 @@ public class Client implements NotificationHandler {
     private void makeMove(WebSocketFacade ws, String username, String playerColor, GameData game) {
         String startSquare;
         String endSquare;
+        String promoPiece;
         Scanner scanner = new Scanner(System.in);
         if (!playerColor.equals(game.game().getTeamTurn().toString())) {
             System.out.println("It's not your turn!");
@@ -450,7 +451,18 @@ public class Client implements NotificationHandler {
             }
             System.out.println("Please enter a move that is 2 characters long! i.e. a2");
         }
-        ws.makeMove(startSquare, endSquare, game, authToken);
+        while (true) {
+            System.out.println("Enter a promotion piece (if applicable) i.e. Q, K, R, B, for Queen, Knight, Rook, or Bishop respectively");
+            promoPiece = scanner.nextLine();
+            if (promoPiece != null) {
+                if (promoPiece.length() == 1) {
+                    if (promoPiece.equals("Q") || promoPiece.equals("K") || promoPiece.equals("R") || promoPiece.equals("B")) {
+                        break;
+                    }
+                }
+            }
+        }
+        ws.makeMove(startSquare, endSquare, promoPiece, game, authToken);
     }
 
     private void resign(WebSocketFacade ws, String authToken, GameData gameData) {
@@ -475,4 +487,5 @@ ISSUES
 - Chess board isn't printing pretty
 - Logic error when creating, listing, and joining games. When joining games, it will say the color has been taken when it hasn't.
 - need to implement logic for promoting a pawn - makeMove takes in a promotion piece, and is restricted to Queen, Rook, Knight, or Bishop
+- what if observer views multiple games at once? (might actually already be covered)
  */

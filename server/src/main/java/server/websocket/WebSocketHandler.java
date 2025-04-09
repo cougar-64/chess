@@ -7,6 +7,7 @@ import com.google.gson.Gson;
 import dataaccess.DataAccess;
 import model.GameData;
 import org.eclipse.jetty.websocket.api.Session;
+import org.eclipse.jetty.websocket.api.annotations.OnWebSocketClose;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
@@ -48,6 +49,11 @@ public class WebSocketHandler {
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
+    }
+
+    @OnWebSocketClose
+    public void onClose(Session session, int statusCode, String reason) {
+        System.out.printf("WebSocket closed: code = %d, reason = %s\n", statusCode, reason);
     }
 
     private String getUsername(String authToken) {
@@ -96,7 +102,7 @@ public class WebSocketHandler {
         int endRow = Character.getNumericValue(endSquare.charAt(1));
         int endCol = endColChar - 'a' + 1;
         try {
-            game.game().makeMove(new ChessMove(new ChessPosition(row, col), new ChessPosition(endRow, endCol), null));
+            game.game().makeMove(new ChessMove(new ChessPosition(row, col), new ChessPosition(endRow, endCol), command.getPromotionPiece()));
             dataaccess.updateGame(gameID, game.game());
             LoadGame loadGameMessage = new LoadGame(dataaccess.getGame(gameID).game(), getPlayerColor());
             connectionManager.loadGameForAll(loadGameMessage);
