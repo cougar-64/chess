@@ -43,8 +43,13 @@ public class WebSocketHandler {
                 case LEAVE -> leaveGame(session, username, gson.fromJson(message, Leave.class));
                 case RESIGN -> resign(session, username, gson.fromJson(message, Resign.class));
             }
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
+        } catch (IOException e) {
+            websocket.messages.Error error = new websocket.messages.Error(e.getMessage());
+            try {
+                session.getRemote().sendString(new Gson().toJson(error)); // fails on this line
+            } catch (IOException io) {
+                System.err.println(io.getMessage());
+            }
         }
     }
 
@@ -53,8 +58,12 @@ public class WebSocketHandler {
         System.out.printf("WebSocket closed: code = %d, reason = %s\n", statusCode, reason);
     }
 
-    private String getUsername(String authToken) {
-        return dataaccess.getAuthData(authToken).username();
+    private String getUsername(String authToken) throws IOException {
+        try {
+            return dataaccess.getAuthData(authToken).username();
+        } catch (Exception e) {
+            throw new IOException("Bad auth!");
+        }
     }
 
     private String getPlayerColor() throws IOException {
@@ -93,30 +102,6 @@ public class WebSocketHandler {
         LoadGame loadGameMessage = new LoadGame(dataaccess.getGame(gameID).game());
         String json = new Gson().toJson(loadGameMessage);
         session.getRemote().sendString(json);
-//        try {
-//            connectionManager.addPlayer(gameID, command.getAuthToken(), session);
-//        } catch (Exception e) {
-//            websocket.messages.Error error = new websocket.messages.Error(e.getMessage());
-//            connectionManager.toClient(command.getAuthToken(), error);
-//        }
-//        String playerColor = getPlayerColor();
-//        try {
-//            if (playerColor != null) {
-//                var observerMessage = String.format("%s joined the game as %s", username, playerColor);
-//                Notification notification = new Notification(observerMessage);
-//                connectionManager.broadcast(command.getAuthToken(), notification);
-//            } else {
-//                var observer = String.format("%s joined the game as an observer", username);
-//                Notification notification = new Notification(observer);
-//                connectionManager.broadcast(command.getAuthToken(), notification);
-//            }
-//            LoadGame loadGameMessage = new LoadGame(dataaccess.getGame(gameID).game());
-//            String json = new Gson().toJson(loadGameMessage);
-//            session.getRemote().sendString(json);
-//        } catch (Exception e) {
-//            websocket.messages.Error error = new websocket.messages.Error(e.getMessage());
-//            connectionManager.toClient(command.getAuthToken(), error);
-//        }
     }
 
     public void makeMove(Session session, MakeMove command) throws IOException {
