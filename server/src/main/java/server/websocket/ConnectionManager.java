@@ -47,6 +47,15 @@ public class ConnectionManager {
         }
     }
 
+    public void notifyToAll(Notification notification) throws IOException {
+        for (var gameSessions : sessionMap.values()) {
+            for (var playerSessionEntry : gameSessions.entrySet()) {
+                Session session = playerSessionEntry.getValue();
+                session.getRemote().sendString(new Gson().toJson(notification));
+            }
+        }
+    }
+
     public void loadGameForAll(LoadGame loadGame) throws IOException {
         for (var gameSessions : sessionMap.values()) {
             for (var playerSessionEntry : gameSessions.entrySet()) {

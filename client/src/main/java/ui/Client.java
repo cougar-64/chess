@@ -507,4 +507,5 @@ public class Client implements NotificationHandler {
 ISSUES
 - Chess board isn't printing pretty
 - what if observer views multiple games at once? (might actually already be covered)
+- makeNormalMove test fails when run in package, but passes when run by itself
  */

@@ -1,5 +1,6 @@
 package server.websocket;
 
+import chess.ChessGame;
 import chess.ChessMove;
 import chess.ChessPosition;
 import chess.InvalidMoveException;
@@ -13,6 +14,7 @@ import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import websocket.commands.*;
 import websocket.messages.*;
+import websocket.messages.Error;
 
 
 import java.io.IOException;
@@ -112,6 +114,18 @@ public class WebSocketHandler {
         ChessPosition endSquare = command.getEndingSquare();
         int endRow = endSquare.getRow();
         int endCol = endSquare.getColumn();
+        ChessGame.TeamColor teamColor;
+        if (getPlayerColor() == "WHITE") {
+            teamColor = ChessGame.TeamColor.WHITE;
+        }
+        else {
+            teamColor = ChessGame.TeamColor.BLACK;
+        }
+        if (!game.game().getBoard().getPiece(new ChessPosition(row, col)).getTeamColor().equals(teamColor)) {
+            websocket.messages.Error error = new websocket.messages.Error("That square has enemy pieces on it!");
+            connectionManager.toClient(command.getAuthToken(), error);
+            return;
+        }
         try {
             game.game().makeMove(new ChessMove(new ChessPosition(row, col), new ChessPosition(endRow, endCol), command.getPromotionPiece()));
             dataaccess.updateGame(gameID, game.game());
@@ -146,14 +160,21 @@ public class WebSocketHandler {
 
     public void resign(Session session, String username, Resign command) throws IOException {
         if (dataaccess.getGame(gameID).game().isItOver()) {
-            System.out.println("The game is over! Go home (type 'leave')");
+            websocket.messages.Error error = new websocket.messages.Error("The game is over! Go home (type 'leave')");
+            connectionManager.toClient(command.getAuthToken(), error);
             return;
         }
-        connectionManager.removePlayer(gameID, command.getAuthToken());
-        dataaccess.getGame(gameID).game().setOver();
+        if (getPlayerColor() == null) {
+            websocket.messages.Error error = new websocket.messages.Error("You can't resign as an observer");
+            connectionManager.toClient(command.getAuthToken(), error);
+            return;
+        }
+        GameData game = dataaccess.getGame(gameID);
+        game.game().setOver();
+        dataaccess.updateGameData(getPlayerColor(), game, username);
         var message = String.format("&s resigned", username);
         Notification notification = new Notification(message);
-        connectionManager.broadcast(command.getAuthToken(), notification);
+        connectionManager.notifyToAll(notification);
         session.close();
     }
 }

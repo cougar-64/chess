@@ -328,6 +328,7 @@ public class MySQLDataBase extends DatabaseManager implements DataAccess {
                 else {
                     throw new DataAccessException("invalid color!");
                 }
+                updateGame(game.gameID(), game.game());
             }
         } catch (SQLException | DataAccessException e) {
             System.err.println(e.getMessage());
