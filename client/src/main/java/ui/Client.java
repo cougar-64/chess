@@ -447,20 +447,20 @@ public class Client implements NotificationHandler {
             joinedGameMenu(username, playerColor, ws, game);
         }
         while (true) {
-            System.out.println("Please enter the square of the piece you would like to move (i.e. a2)");
+            System.out.println("Please enter the row and column of the piece you would like to move (i.e. 12 for a2)");
             startSquare = scanner.nextLine();
             if (startSquare.length() == 2) {
                 break;
             }
-            System.out.println("Please enter a move that is 2 characters long! i.e. a2");
+            System.out.println("Please enter a move that is 2 characters long! i.e. 12");
         }
         while (true) {
-            System.out.println("Enter the square you would like to move your piece to");
+            System.out.println("Enter the row and column you would like to move your piece to (i.e. 13 for a3");
             endSquare = scanner.nextLine();
             if (endSquare.length() == 2) {
                 break;
             }
-            System.out.println("Please enter a move that is 2 characters long! i.e. a2");
+            System.out.println("Please enter a move that is 2 characters long! i.e. 13");
         }
         while (true) {
             System.out.println("Enter a promotion piece (if applicable) i.e. Q, K, R, B, for Queen, Knight, Rook, or Bishop respectively");
@@ -506,6 +506,5 @@ public class Client implements NotificationHandler {
 /*
 ISSUES
 - Chess board isn't printing pretty
-- Logic error when creating, listing, and joining games. When joining games, it will say the color has been taken when it hasn't.
 - what if observer views multiple games at once? (might actually already be covered)
  */
