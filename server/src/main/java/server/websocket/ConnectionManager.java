@@ -23,8 +23,9 @@ public class ConnectionManager {
         }
     }
 
-    public void broadcast(String excludePlayer, Notification notification) throws IOException {
-        for (var gameSessions : sessionMap.values()) {
+    public void broadcast(int gameID, String excludePlayer, Notification notification) throws IOException {
+        var gameSessions = sessionMap.get(gameID);
+        if (gameSessions != null) {
             for (var playerSessionEntry : gameSessions.entrySet()) {
                 String authToken = playerSessionEntry.getKey();
                 Session session = playerSessionEntry.getValue();
@@ -47,8 +48,9 @@ public class ConnectionManager {
         }
     }
 
-    public void notifyToAll(Notification notification) throws IOException {
-        for (var gameSessions : sessionMap.values()) {
+    public void notifyToAll(int gameID, Notification notification) throws IOException {
+        var gameSessions = sessionMap.get(gameID);
+        if (gameSessions != null) {
             for (var playerSessionEntry : gameSessions.entrySet()) {
                 Session session = playerSessionEntry.getValue();
                 session.getRemote().sendString(new Gson().toJson(notification));
@@ -56,13 +58,14 @@ public class ConnectionManager {
         }
     }
 
-    public void loadGameForAll(LoadGame loadGame) throws IOException {
-        for (var gameSessions : sessionMap.values()) {
+    public void loadGameForAll(int gameID, LoadGame loadGame) throws IOException {
+        var gameSessions = sessionMap.get(gameID);
+        if (gameSessions != null) {
             for (var playerSessionEntry : gameSessions.entrySet()) {
                 Session session = playerSessionEntry.getValue();
-                    session.getRemote().sendString(new Gson().toJson(loadGame));
-                }
+                session.getRemote().sendString(new Gson().toJson(loadGame));
             }
         }
+    }
 }
 

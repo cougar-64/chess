@@ -94,12 +94,12 @@ public class WebSocketHandler {
         if (playerColor != null) {
             var observeMessage = String.format("%s joined the game as %s", username, playerColor);
             Notification notification = new Notification(observeMessage);
-            connectionManager.broadcast(command.getAuthToken(), notification);
+            connectionManager.broadcast(gameID, command.getAuthToken(), notification);
         }
         else {
             var observer = String.format("%s joined the game as an observer", username);
             Notification notification = new Notification(observer);
-            connectionManager.broadcast(command.getAuthToken(), notification);
+            connectionManager.broadcast(gameID, command.getAuthToken(), notification);
         }
         LoadGame loadGameMessage = new LoadGame(dataaccess.getGame(gameID).game());
         String json = new Gson().toJson(loadGameMessage);
@@ -130,9 +130,9 @@ public class WebSocketHandler {
             game.game().makeMove(new ChessMove(new ChessPosition(row, col), new ChessPosition(endRow, endCol), command.getPromotionPiece()));
             dataaccess.updateGame(gameID, game.game());
             LoadGame loadGameMessage = new LoadGame(dataaccess.getGame(gameID).game());
-            connectionManager.loadGameForAll(loadGameMessage);
+            connectionManager.loadGameForAll(gameID, loadGameMessage);
             Notification notification = new Notification("The move made was " + row + ", " + col + "to " + endRow + ", " + endCol);
-            connectionManager.broadcast(command.getAuthToken(), notification);
+            connectionManager.broadcast(gameID, command.getAuthToken(), notification);
         } catch (InvalidMoveException e) {
             websocket.messages.Error error = new websocket.messages.Error(e.getMessage());
             connectionManager.toClient(command.getAuthToken(), error);
@@ -154,7 +154,7 @@ public class WebSocketHandler {
         connectionManager.removePlayer(gameID, command.getAuthToken());
         var message = String.format("%s has left the game", username);
         Notification notification = new Notification(message);
-        connectionManager.broadcast(command.getAuthToken(), notification);
+        connectionManager.broadcast(gameID, command.getAuthToken(), notification);
         session.close();
     }
 
@@ -174,7 +174,7 @@ public class WebSocketHandler {
         dataaccess.updateGameData(getPlayerColor(), game, username);
         var message = String.format("&s resigned", username);
         Notification notification = new Notification(message);
-        connectionManager.notifyToAll(notification);
+        connectionManager.notifyToAll(gameID, notification);
         session.close();
     }
 }
