@@ -1,23 +1,24 @@
 package websocket.commands;
 
 import chess.ChessPiece;
+import chess.ChessPosition;
 
 public class MakeMove extends UserGameCommand {
-    private final String startingSquare;
-    private final String endingSquare;
+    private final ChessPosition startingSquare;
+    private final ChessPosition endingSquare;
     private final ChessPiece.PieceType promotionPiece;
-    public MakeMove(String authToken, Integer gameID, String startingSquare, String endingSquare, ChessPiece.PieceType promotionPiece) {
+    public MakeMove(String authToken, Integer gameID, ChessPosition startingSquare, ChessPosition endingSquare, ChessPiece.PieceType promotionPiece) {
         super(CommandType.MAKE_MOVE, authToken, gameID);
         this.startingSquare = startingSquare;
         this.endingSquare = endingSquare;
         this.promotionPiece = promotionPiece;
     }
 
-    public String getStartingSquare() {
+    public ChessPosition getStartingSquare() {
         return startingSquare;
     }
 
-    public String getEndingSquare() {
+    public ChessPosition getEndingSquare() {
         return endingSquare;
     }
 

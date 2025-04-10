@@ -46,7 +46,7 @@ public class WebSocketHandler {
         } catch (IOException e) {
             websocket.messages.Error error = new websocket.messages.Error(e.getMessage());
             try {
-                session.getRemote().sendString(new Gson().toJson(error)); // fails on this line
+                session.getRemote().sendString(new Gson().toJson(error));
             } catch (IOException io) {
                 System.err.println(io.getMessage());
             }
@@ -101,19 +101,17 @@ public class WebSocketHandler {
         }
         LoadGame loadGameMessage = new LoadGame(dataaccess.getGame(gameID).game());
         String json = new Gson().toJson(loadGameMessage);
-        session.getRemote().sendString(json);
+            session.getRemote().sendString(json);
     }
 
     public void makeMove(Session session, MakeMove command) throws IOException {
         GameData game = dataaccess.getGame(gameID);
-        String startSquare = command.getStartingSquare();
-        char colChar = startSquare.charAt(0);
-        int row = Character.getNumericValue(startSquare.charAt(1));
-        int col = colChar - 'a' + 1;
-        String endSquare = command.getEndingSquare();
-        char endColChar = endSquare.charAt(0);
-        int endRow = Character.getNumericValue(endSquare.charAt(1));
-        int endCol = endColChar - 'a' + 1;
+        ChessPosition startSquare = command.getStartingSquare();
+        int row = startSquare.getRow();
+        int col = startSquare.getColumn();
+        ChessPosition endSquare = command.getEndingSquare();
+        int endRow = endSquare.getRow();
+        int endCol = endSquare.getColumn();
         try {
             game.game().makeMove(new ChessMove(new ChessPosition(row, col), new ChessPosition(endRow, endCol), command.getPromotionPiece()));
             dataaccess.updateGame(gameID, game.game());
