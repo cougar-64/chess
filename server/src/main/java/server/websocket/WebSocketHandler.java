@@ -53,10 +53,10 @@ public class WebSocketHandler {
         }
     }
 
-    @OnWebSocketClose
-    public void onClose(Session session, int statusCode, String reason) {
-        System.out.printf("WebSocket closed: code = %d, reason = %s\n", statusCode, reason);
-    }
+//    @OnWebSocketClose
+//    public void onClose(Session session, int statusCode, String reason) {
+//        System.out.printf("WebSocket closed: code = %d, reason = %s\n", statusCode, reason);
+//    }
 
     private String getUsername(String authToken) throws IOException {
         try {
@@ -117,6 +117,8 @@ public class WebSocketHandler {
             dataaccess.updateGame(gameID, game.game());
             LoadGame loadGameMessage = new LoadGame(dataaccess.getGame(gameID).game());
             connectionManager.loadGameForAll(loadGameMessage);
+            Notification notification = new Notification("The move made was " + row + ", " + col + "to " + endRow + ", " + endCol);
+            connectionManager.broadcast(command.getAuthToken(), notification);
         } catch (InvalidMoveException e) {
             websocket.messages.Error error = new websocket.messages.Error(e.getMessage());
             connectionManager.toClient(command.getAuthToken(), error);
