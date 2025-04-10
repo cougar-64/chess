@@ -57,24 +57,32 @@ public class WebSocketHandler {
         return dataaccess.getAuthData(authToken).username();
     }
 
-    private String getPlayerColor() {
-        GameData game = dataaccess.getGame(gameID);
-        if (username.equals(game.blackUsername())) {
-            return "BLACK";
-        }
-        else if (username.equals(game.whiteUsername())) {
-            return "WHITE";
-        }
-        return null;
+    private String getPlayerColor() throws IOException {
+            GameData game = dataaccess.getGame(gameID);
+            if (game == null) {
+                throw new IOException("The game you're trying to access does not exist!");
+            }
+            if (username.equals(game.blackUsername())) {
+                return "BLACK";
+            } else if (username.equals(game.whiteUsername())) {
+                return "WHITE";
+            }
+            return null;
     }
 
     private void connect(Session session, String username, Connect command) throws IOException {
+        String playerColor;
         connectionManager.addPlayer(gameID, command.getAuthToken(), session);
-        String playerColor = getPlayerColor(); // returns isOpen() = false
+        try {
+            playerColor = getPlayerColor();
+        } catch (IOException e) {
+            websocket.messages.Error error = new websocket.messages.Error(e.getMessage());
+            connectionManager.toClient(command.getAuthToken(), error);
+            return;
+        }
         if (playerColor != null) {
-
-            var observerMessage = String.format("%s joined the game as %s", username, playerColor);
-            Notification notification = new Notification(observerMessage);
+            var observeMessage = String.format("%s joined the game as %s", username, playerColor);
+            Notification notification = new Notification(observeMessage);
             connectionManager.broadcast(command.getAuthToken(), notification);
         }
         else {
@@ -85,6 +93,30 @@ public class WebSocketHandler {
         LoadGame loadGameMessage = new LoadGame(dataaccess.getGame(gameID).game());
         String json = new Gson().toJson(loadGameMessage);
         session.getRemote().sendString(json);
+//        try {
+//            connectionManager.addPlayer(gameID, command.getAuthToken(), session);
+//        } catch (Exception e) {
+//            websocket.messages.Error error = new websocket.messages.Error(e.getMessage());
+//            connectionManager.toClient(command.getAuthToken(), error);
+//        }
+//        String playerColor = getPlayerColor();
+//        try {
+//            if (playerColor != null) {
+//                var observerMessage = String.format("%s joined the game as %s", username, playerColor);
+//                Notification notification = new Notification(observerMessage);
+//                connectionManager.broadcast(command.getAuthToken(), notification);
+//            } else {
+//                var observer = String.format("%s joined the game as an observer", username);
+//                Notification notification = new Notification(observer);
+//                connectionManager.broadcast(command.getAuthToken(), notification);
+//            }
+//            LoadGame loadGameMessage = new LoadGame(dataaccess.getGame(gameID).game());
+//            String json = new Gson().toJson(loadGameMessage);
+//            session.getRemote().sendString(json);
+//        } catch (Exception e) {
+//            websocket.messages.Error error = new websocket.messages.Error(e.getMessage());
+//            connectionManager.toClient(command.getAuthToken(), error);
+//        }
     }
 
     public void makeMove(Session session, MakeMove command) throws IOException {

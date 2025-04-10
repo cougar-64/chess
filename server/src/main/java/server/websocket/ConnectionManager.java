@@ -55,4 +55,14 @@ public class ConnectionManager {
                 }
             }
         }
-    }
+//
+//        private boolean isValidID(int gameID) {
+//            for (int session : sessionMap.keySet()) {
+//                if (session == gameID) {
+//                    return true;
+//                }
+//            }
+//            return false;
+//        }
+}
+
