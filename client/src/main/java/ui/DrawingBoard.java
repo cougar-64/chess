@@ -116,6 +116,16 @@ public class DrawingBoard {
         boolean isWhite = playerColor.equals("WHITE");
         initializeBoard(isWhite);
         updateBoard(isWhite);
+        if (validMoves == null) {
+            if (playerColor.equals("WHITE")) {
+                printBoardFromWhite();
+                return;
+            }
+            else {
+                printBoardFromBlack();
+                return;
+            }
+        }
 
         ChessPosition startPos = validMoves.iterator().next().getStartPosition();
 
@@ -128,9 +138,7 @@ public class DrawingBoard {
                     int boardCol = isWhite ? j : 9 - j;
                     ChessPosition currentPos = new ChessPosition(boardRow, boardCol);
 
-                    int displayRow = isWhite ? i : 9 - i;
-                    int displayCol = isWhite ? j : 9 - j;
-                    String piece = board[displayRow][displayCol];
+                    String piece = board[i][j];
 
                     boolean isStart = currentPos.equals(startPos);
                     boolean isValidMove = validMoves.stream()

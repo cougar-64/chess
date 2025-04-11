@@ -129,7 +129,6 @@ public class WebSocketHandler {
         try {
             game.game().makeMove(new ChessMove(new ChessPosition(row, col), new ChessPosition(endRow, endCol), command.getPromotionPiece()));
             dataaccess.updateGame(gameID, game.game());
-            System.out.println(game.game().getTeamTurn());
             LoadGame loadGameMessage = new LoadGame(dataaccess.getGame(gameID).game());
             connectionManager.loadGameForAll(gameID, loadGameMessage);
             Notification notification = new Notification("The move made was " + col + ", " + row + "to " + endCol + ", " + endRow);

@@ -1,4 +1,5 @@
 package ui;
+import chess.ChessBoard;
 import chess.ChessGame;
 import chess.ChessMove;
 import chess.ChessPosition;
@@ -17,6 +18,7 @@ import java.util.Map;
 import java.util.Scanner;
 
 public class Client implements NotificationHandler {
+    private ChessGame game;
     private String url;
     private WebSocketFacade ws;
     private String playerColor;
@@ -281,10 +283,11 @@ public class Client implements NotificationHandler {
                 else if (words[1].equals("BLACK")) {
                     playerColor = "BLACK";
                 }
-                GameData game = serverFacade.join(authToken, words[0], words[1], gameList);
+                GameData gameData = serverFacade.join(authToken, words[0], words[1], gameList);
+                game = gameData.game();
                 ws = new WebSocketFacade(url, this);
-                ws.connect(game, authToken);
-                joinedGameMenu(username, words[1], ws, game);
+                ws.connect(gameData, authToken);
+                joinedGameMenu(username, words[1], ws, gameData);
             } catch (ResponseException e) {
                 System.err.println(e.getMessage());
                 System.out.println("Please try again");
@@ -388,7 +391,7 @@ public class Client implements NotificationHandler {
                         resign(ws, authToken, game);
                         break;
                     case "highlight":
-                        highlight(game, playerColor);
+                        highlight(playerColor);
                         break;
                     default:
                         System.out.println("Invalid input! Please type 'help' to get started");
@@ -469,7 +472,7 @@ public class Client implements NotificationHandler {
             System.out.println(e.getMessage());
         }
     }
-    private void highlight(GameData game, String playerColor) {
+    private void highlight(String playerColor) {
         Scanner scanner = new Scanner(System.in);
         String[] rowAndCol;
         while (true) {
@@ -482,9 +485,10 @@ public class Client implements NotificationHandler {
                 System.out.println("Error: Please enter a valid square (i.e., 12 for a2)");
             }
         }
+
         ChessPosition position = new ChessPosition(Integer.parseInt(rowAndCol[1]), Integer.parseInt(rowAndCol[0]));
-        Collection<ChessMove> validMoves = game.game().validMoves(position);
-        DrawingBoard draw = new DrawingBoard(game.game().getBoard());
+        Collection<ChessMove> validMoves = game.validMoves(position);
+        DrawingBoard draw = new DrawingBoard(game.getBoard());
         draw.highlight(validMoves, playerColor);
     }
     public void notify(Notification notification) {
@@ -502,13 +506,12 @@ public class Client implements NotificationHandler {
         else {
             draw.printBoardFromBlack();
         }
+        this.game = game;
     }
 }
 
 /*
 to do:
-- program crashing when invalid moves are inputted (and maybe the board isn't being printed if it doesn't crash?)
-- team turn isn't correctly passed over - white moves and "it's still not blacks turn"
-- When making a normal move, white throws an error saying there is an enemy piece on the starting square
+- highlight is printing the original board and isn't completely correct
 - EVERYTHING STILL PASSES AUTOGRADER - MUST BE A CLIENT SIDE ISSUE
  */

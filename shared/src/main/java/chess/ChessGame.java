@@ -56,6 +56,9 @@ public class ChessGame implements Serializable {
      * startPosition
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
+        if (board.getPiece(startPosition) == null) {
+            return null;
+        }
         TeamColor teamColor = board.getPiece(startPosition).getTeamColor();
         Collection<ChessMove> finalValidMoves = new ArrayList<>();
         ChessBoard currentBoard = getBoard();
