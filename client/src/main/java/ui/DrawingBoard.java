@@ -16,22 +16,35 @@ public class DrawingBoard {
     public DrawingBoard(ChessBoard board) {
         this.chessboard = board;
         this.board = new String[10][10];
-        initializeBoard();
     }
 
-    private void initializeBoard() {
-        board[0] = new String[]{EscapeSequences.EMPTY, " a ", " b ", " c ", " d ", " e ", " f ", " g ", " h ", EscapeSequences.EMPTY};
-        board[9] = new String[]{EscapeSequences.EMPTY, " a ", " b ", " c ", " d ", " e ", " f ", " g ", " h ", EscapeSequences.EMPTY};
+    private void initializeBoard(boolean isWhite) {
+        String[] files = new String[]{" a ", " b ", " c ", " d ", " e ", " f ", " g ", " h "};
+        board[0] = new String[10];
+        board[9] = new String[10];
+        board[0][0] = board[0][9] = board[9][0] = board[9][9] = EscapeSequences.EMPTY;
+
+        // File labels (top and bottom)
+        for (int i = 0; i < 8; i++) {
+            board[0][i + 1] = isWhite ? files[i] : files[7 - i]; // top
+            board[9][i + 1] = isWhite ? files[i] : files[7 - i]; // bottom
+        }
+
+        // Rank labels (left and right)
         for (int i = 1; i <= 8; i++) {
-            board[i][0] = " " + (9 - i) + " ";
-            board[i][9] = " " + (9 - i) + " ";
+            String rank = " " + (isWhite ? 9 - i : i) + " ";
+            board[i][0] = rank;         // left
+            board[i][9] = rank;         // right
         }
     }
 
-    private void updateBoard() {
+    private void updateBoard(boolean isWhite) {
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
-                ChessPiece piece = chessboard.getPiece(new ChessPosition(i + 1, j + 1));
+                int boardRow = isWhite ? 8 - i : i + 1;
+                int boardCol = isWhite ? j + 1 : 8 - j;
+
+                ChessPiece piece = chessboard.getPiece(new ChessPosition(boardRow, boardCol));
                 String pieceSymbol = (piece == null) ? EscapeSequences.EMPTY : getPieceSymbol(piece);
                 board[i + 1][j + 1] = pieceSymbol;
             }
@@ -77,7 +90,8 @@ public class DrawingBoard {
     }
 
     public void printBoardFromWhite() {
-        updateBoard();
+        initializeBoard(true);
+        updateBoard(true);
         for (int i = 0; i < 10; i++) {
             for (int j = 0; j < 10; j++) {
                 checkBounds(i, j, true);
@@ -87,10 +101,8 @@ public class DrawingBoard {
     }
 
     public void printBoardFromBlack() {
-        updateBoard();
-        String[] reversed = new String[]{EscapeSequences.EMPTY, " h ", " g ", " f ", " e ", " d ", " c ", " b ", " a ", EscapeSequences.EMPTY};
-        board[0] = reversed;
-        board[9] = reversed;
+        initializeBoard(false);
+        updateBoard(false);
         for (int i = 9; i >= 0; i--) {
             for (int j = 9; j >= 0; j--) {
                 checkBounds(i, j, false);
@@ -102,7 +114,8 @@ public class DrawingBoard {
     private void checkBounds(int i, int j, boolean isWhite) {
         if (i == 0 || i == 9 || j == 0 || j == 9) {
             if (i == 0 || i == 9) {
-                System.out.print(borderColor + board[i][j]);
+                // Flip file labels if viewing from black's perspective
+                System.out.print(borderColor + board[i][isWhite ? j : 9 - j]);
             } else {
                 if (isWhite) {
                     System.out.print(borderColor + board[i][j]);
@@ -118,25 +131,40 @@ public class DrawingBoard {
     }
 
     public void highlight(Collection<ChessMove> validMoves, String playerColor) {
-        updateBoard();
+        boolean isWhite = playerColor.equals("WHITE");
+        initializeBoard(isWhite);
+        updateBoard(isWhite);
 
+        // Get the start position (assumes all moves are from the same start)
+        ChessPosition startPos = validMoves.iterator().next().getStartPosition();
 
-        for (int i = 1; i < 9; i++) {
-            for (int j = 1; j < 9; j++) {
-                int finalI = i;
-                int finalJ = j;
-                boolean isValidMove = validMoves.stream().anyMatch(move ->
-                        move.getEndPosition().equals(new ChessPosition(finalI, finalJ)));
-
-                if (isValidMove) {
-                    highlightSquare(i, j, true);
+        for (int i = 0; i < 10; i++) {
+            for (int j = 0; j < 10; j++) {
+                if (i == 0 || i == 9 || j == 0 || j == 9) {
+                    checkBounds(i, j, isWhite);
                 } else {
-                    checkBounds(i, j, playerColor.equals("WHITE"));
+                    ChessPosition currentPos = new ChessPosition(
+                            isWhite ? 8 - i + 1 : i,
+                            isWhite ? j : 9 - j
+                    );
+                    boolean isStart = currentPos.equals(startPos);
+                    boolean isValidMove = validMoves.stream()
+                            .anyMatch(move -> move.getEndPosition().equals(currentPos));
+
+                    if (isStart) {
+                        System.out.print(highlightColor + board[i][j] + reset);
+                    } else if (isValidMove) {
+                        System.out.print(highlightColor + board[i][j] + reset);
+                    } else {
+                        boolean darkOrLight = (i + j) % 2 == 0;
+                        System.out.print((darkOrLight ? lightColor : darkColor) + board[i][j] + reset);
+                    }
                 }
             }
             System.out.println(reset);
         }
     }
+
     private void highlightSquare(int i, int j, boolean isValidMove) {
         if (isValidMove) {
             System.out.print(highlightColor + board[i][j] + reset);
