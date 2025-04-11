@@ -116,6 +116,11 @@ public class WebSocketHandler {
         else {
             teamColor = ChessGame.TeamColor.BLACK;
         }
+        if (!game.game().getTeamTurn().equals(teamColor)) {
+            websocket.messages.Error error = new websocket.messages.Error("It's not your turnnnnn");
+            connectionManager.toClient(command.getAuthToken(), error);
+            return;
+        }
         if (!game.game().getBoard().getPiece(new ChessPosition(row, col)).getTeamColor().equals(teamColor)) {
             websocket.messages.Error error = new websocket.messages.Error("That square has enemy pieces on it!");
             connectionManager.toClient(command.getAuthToken(), error);
@@ -124,6 +129,7 @@ public class WebSocketHandler {
         try {
             game.game().makeMove(new ChessMove(new ChessPosition(row, col), new ChessPosition(endRow, endCol), command.getPromotionPiece()));
             dataaccess.updateGame(gameID, game.game());
+            System.out.println(game.game().getTeamTurn());
             LoadGame loadGameMessage = new LoadGame(dataaccess.getGame(gameID).game());
             connectionManager.loadGameForAll(gameID, loadGameMessage);
             Notification notification = new Notification("The move made was " + col + ", " + row + "to " + endCol + ", " + endRow);

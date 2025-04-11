@@ -421,10 +421,6 @@ public class Client implements NotificationHandler {
         String endSquare;
         String promoPiece;
         Scanner scanner = new Scanner(System.in);
-        if (!playerColor.equals(game.game().getTeamTurn().toString())) {
-            System.out.println("It's not your turn!");
-            joinedGameMenu(username, playerColor, ws, game);
-        }
         while (true) {
             System.out.println("Please enter the row and column of the piece you would like to move (i.e. 12 for a2)");
             startSquare = scanner.nextLine();
@@ -455,6 +451,7 @@ public class Client implements NotificationHandler {
                     }
                 }
             }
+            System.out.println("Error: Please enter a valid promotion piece!");
         }
         ws.makeMove(startSquare, endSquare, promoPiece, game, authToken);
     }
@@ -496,3 +493,11 @@ public class Client implements NotificationHandler {
         }
     }
 }
+
+/*
+to do:
+- program crashing when invalid moves are inputted (and maybe the board isn't being printed if it doesn't crash?)
+- team turn isn't correctly passed over - white moves and "it's still not blacks turn"
+- When making a normal move, white throws an error saying there is an enemy piece on the starting square
+- EVERYTHING STILL PASSES AUTOGRADER - MUST BE A CLIENT SIDE ISSUE
+ */
