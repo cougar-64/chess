@@ -462,7 +462,12 @@ public class Client implements NotificationHandler {
         }
     }
     private void resign(WebSocketFacade ws, String authToken, GameData gameData) {
-        ws.resign(gameData, authToken);
+        try {
+            ws.resign(gameData, authToken);
+            postLoginMenu(username);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
     }
     private void highlight(GameData game, String playerColor) {
         Scanner scanner = new Scanner(System.in);

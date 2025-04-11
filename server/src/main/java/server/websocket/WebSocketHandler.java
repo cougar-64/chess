@@ -173,6 +173,7 @@ public class WebSocketHandler {
         GameData game = dataaccess.getGame(gameID);
         game.game().setOver();
         dataaccess.updateGameData(getPlayerColor(), game, username);
+        connectionManager.removePlayer(gameID, command.getAuthToken());
         var message = String.format("&s resigned", username);
         Notification notification = new Notification(message);
         connectionManager.notifyToAll(gameID, notification);
