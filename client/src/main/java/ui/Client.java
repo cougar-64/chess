@@ -330,15 +330,22 @@ public class Client implements NotificationHandler {
                     "or type '..' to return to the main menu");
         }
         try {
-            GameData game = gameList.get(Integer.parseInt(words[0]));
+            GameData gameData = gameList.get(Integer.parseInt(words[0]));
+            game = gameData.game();
             ws = new WebSocketFacade(url, this);
-            ws.connect(game, authToken);
+            ws.connect(gameData, authToken);
             playerColor = "WHITE";
             while (true) {
                 System.out.println("Type 'leave' at any point to leave the game");
                 String input = scanner.nextLine();
                 if (input.equals("leave")) {
-                    leave(ws, game);
+                    leave(ws, gameData);
+                }
+                else if (input.equals("redraw")) {
+                    redraw(ws);
+                }
+                else if (input.equals("highlight")) {
+                    highlight(playerColor);
                 }
                 else {
                     System.out.println("Error: could not interpret input");
@@ -379,7 +386,7 @@ public class Client implements NotificationHandler {
                         joinedHelp();
                         break;
                     case "redraw":
-                        redraw(ws, playerColor, game);
+                        redraw(ws);
                         break;
                     case "leave":
                         leave(ws, game);
@@ -409,8 +416,9 @@ public class Client implements NotificationHandler {
                 resign - resign from your current game
                 highlight - highlights all legal moves""");
     }
-    private void redraw(WebSocketFacade ws, String playerColor, GameData game) {
-        String json = new Gson().toJson(new LoadGame(game.game()));
+    private void redraw(WebSocketFacade ws) {
+        LoadGame game = new LoadGame(this.game);
+        String json = new Gson().toJson(game);
         ws.loadGame(json);
     }
     private void leave (WebSocketFacade ws, GameData game) {
@@ -429,7 +437,7 @@ public class Client implements NotificationHandler {
         while (true) {
             System.out.println("Please enter the row and column of the piece you would like to move (i.e. 12 for a2)");
             startSquare = scanner.nextLine();
-            if (startSquare.length() == 2) {
+            if (startSquare.length() == 2 && Character.isDigit(startSquare.charAt(0)) && Character.isDigit(startSquare.charAt(1))) {
                 break;
             }
             System.out.println("Please enter a move that is 2 characters long! i.e. 12");
@@ -437,7 +445,8 @@ public class Client implements NotificationHandler {
         while (true) {
             System.out.println("Enter the row and column you would like to move your piece to (i.e. 13 for a3");
             endSquare = scanner.nextLine();
-            if (endSquare.length() == 2) {
+            if (endSquare.length() == 2 && Character.isDigit(endSquare.charAt(0)) &&
+                    Character.isDigit(endSquare.charAt(1))) {
                 break;
             }
             System.out.println("Please enter a move that is 2 characters long! i.e. 13");
@@ -492,7 +501,8 @@ public class Client implements NotificationHandler {
         draw.highlight(validMoves, playerColor);
     }
     public void notify(Notification notification) {
-        System.out.println(notification.getMessage());
+        String message = notification.getMessage();
+        System.out.println(message);
     }
     public void errorify(websocket.messages.Error error) {
         System.out.println(error.getMessage());
@@ -512,6 +522,7 @@ public class Client implements NotificationHandler {
 
 /*
 to do:
-- highlight is printing the original board and isn't completely correct
-- EVERYTHING STILL PASSES AUTOGRADER - MUST BE A CLIENT SIDE ISSUE
+- don't print out json
+- redraw is not drawing the current board
+- error trying to highlight d8??
  */
