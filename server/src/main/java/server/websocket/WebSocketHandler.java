@@ -131,7 +131,7 @@ public class WebSocketHandler {
             dataaccess.updateGame(gameID, game.game());
             LoadGame loadGameMessage = new LoadGame(dataaccess.getGame(gameID).game());
             connectionManager.loadGameForAll(gameID, loadGameMessage);
-            Notification notification = new Notification("The move made was " + row + ", " + col + "to " + endRow + ", " + endCol);
+            Notification notification = new Notification("The move made was " + col + ", " + row + "to " + endCol + ", " + endRow);
             connectionManager.broadcast(gameID, command.getAuthToken(), notification);
         } catch (InvalidMoveException e) {
             websocket.messages.Error error = new websocket.messages.Error(e.getMessage());
