@@ -43,49 +43,32 @@ public class DrawingBoard {
                 int boardCol = isWhite ? j + 1 : 8 - j;
 
                 ChessPiece piece = chessboard.getPiece(new ChessPosition(boardRow, boardCol));
-                String pieceSymbol = (piece == null) ? EscapeSequences.EMPTY : getPieceSymbol(piece, isWhite);
-                board[i + 1][j + 1] = pieceSymbol;
+                String pieceSymbol = (piece == null) ? EscapeSequences.EMPTY : getPieceSymbol(piece);
+                int displayRow = isWhite ? i + 1 : 8 - i;
+                int displayCol = isWhite ? j + 1 : 8 - j;
+                board[displayRow][displayCol] = pieceSymbol;
             }
         }
     }
 
-    private String getPieceSymbol(ChessPiece piece, boolean isPlayerWhite) {
-        boolean isMyPiece = piece.getTeamColor() == (isPlayerWhite ? ChessGame.TeamColor.WHITE : ChessGame.TeamColor.BLACK);
+    private String getPieceSymbol(ChessPiece piece) {
+        boolean isWhitePiece = piece.getTeamColor() == ChessGame.TeamColor.WHITE;
 
-        if (isMyPiece) {
-            switch (piece.getPieceType()) {
-                case KING:
-                    return " ♔ ";
-                case QUEEN:
-                    return " ♕ ";
-                case ROOK:
-                    return " ♖ ";
-                case BISHOP:
-                    return " ♗ ";
-                case KNIGHT:
-                    return " ♘ ";
-                case PAWN:
-                    return " ♙ ";
-                default:
-                    return EscapeSequences.EMPTY;
-            }
-        } else {
-            switch (piece.getPieceType()) {
-                case KING:
-                    return " ♚ ";
-                case QUEEN:
-                    return " ♛ ";
-                case ROOK:
-                    return " ♜ ";
-                case BISHOP:
-                    return " ♝ ";
-                case KNIGHT:
-                    return " ♞ ";
-                case PAWN:
-                    return " ♟ ";
-                default:
-                    return EscapeSequences.EMPTY;
-            }
+        switch (piece.getPieceType()) {
+            case KING:
+                return isWhitePiece ? " ♔ " : " ♚ ";
+            case QUEEN:
+                return isWhitePiece ? " ♕ " : " ♛ ";
+            case ROOK:
+                return isWhitePiece ? " ♖ " : " ♜ ";
+            case BISHOP:
+                return isWhitePiece ? " ♗ " : " ♝ ";
+            case KNIGHT:
+                return isWhitePiece ? " ♘ " : " ♞ ";
+            case PAWN:
+                return isWhitePiece ? " ♙ " : " ♟ ";
+            default:
+                return EscapeSequences.EMPTY;
         }
     }
 
@@ -141,21 +124,23 @@ public class DrawingBoard {
                 if (i == 0 || i == 9 || j == 0 || j == 9) {
                     checkBounds(i, j, isWhite);
                 } else {
-                    ChessPosition currentPos = new ChessPosition(
-                            isWhite ? 8 - i + 1 : i,
-                            isWhite ? j : 9 - j
-                    );
+                    int boardRow = isWhite ? 8 - (i - 1) : i;
+                    int boardCol = isWhite ? j : 9 - j;
+                    ChessPosition currentPos = new ChessPosition(boardRow, boardCol);
+
+                    int displayRow = isWhite ? i : 9 - i;
+                    int displayCol = isWhite ? j : 9 - j;
+                    String piece = board[displayRow][displayCol];
+
                     boolean isStart = currentPos.equals(startPos);
                     boolean isValidMove = validMoves.stream()
                             .anyMatch(move -> move.getEndPosition().equals(currentPos));
 
-                    if (isStart) {
-                        System.out.print(highlightColor + board[i][j] + reset);
-                    } else if (isValidMove) {
-                        System.out.print(highlightColor + board[i][j] + reset);
+                    if (isStart || isValidMove) {
+                        System.out.print(highlightColor + piece + reset);
                     } else {
                         boolean darkOrLight = (i + j) % 2 == 0;
-                        System.out.print((darkOrLight ? lightColor : darkColor) + board[i][j] + reset);
+                        System.out.print((darkOrLight ? lightColor : darkColor) + piece + reset);
                     }
                 }
             }

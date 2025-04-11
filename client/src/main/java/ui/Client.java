@@ -9,6 +9,8 @@ import model.*;
 import ui.websocket.NotificationHandler;
 import ui.websocket.WebSocketFacade;
 import websocket.messages.*;
+
+import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -453,7 +455,11 @@ public class Client implements NotificationHandler {
             }
             System.out.println("Error: Please enter a valid promotion piece!");
         }
-        ws.makeMove(startSquare, endSquare, promoPiece, game, authToken);
+        try {
+            ws.makeMove(startSquare, endSquare, promoPiece, game, authToken);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
     }
     private void resign(WebSocketFacade ws, String authToken, GameData gameData) {
         ws.resign(gameData, authToken);
