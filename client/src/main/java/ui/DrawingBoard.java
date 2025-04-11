@@ -43,14 +43,16 @@ public class DrawingBoard {
                 int boardCol = isWhite ? j + 1 : 8 - j;
 
                 ChessPiece piece = chessboard.getPiece(new ChessPosition(boardRow, boardCol));
-                String pieceSymbol = (piece == null) ? EscapeSequences.EMPTY : getPieceSymbol(piece);
+                String pieceSymbol = (piece == null) ? EscapeSequences.EMPTY : getPieceSymbol(piece, isWhite);
                 board[i + 1][j + 1] = pieceSymbol;
             }
         }
     }
 
-    private String getPieceSymbol(ChessPiece piece) {
-        if (piece.getTeamColor() == ChessGame.TeamColor.WHITE) {
+    private String getPieceSymbol(ChessPiece piece, boolean isPlayerWhite) {
+        boolean isMyPiece = piece.getTeamColor() == (isPlayerWhite ? ChessGame.TeamColor.WHITE : ChessGame.TeamColor.BLACK);
+
+        if (isMyPiece) {
             switch (piece.getPieceType()) {
                 case KING:
                     return " ♔ ";
