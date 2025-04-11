@@ -1,5 +1,7 @@
 package ui;
 import chess.ChessGame;
+import chess.ChessMove;
+import chess.ChessPosition;
 import chess.InvalidMoveException;
 import com.google.gson.Gson;
 import server.ServerFacade;
@@ -8,7 +10,7 @@ import model.*;
 import ui.websocket.NotificationHandler;
 import ui.websocket.WebSocketFacade;
 import websocket.messages.*;
-
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
@@ -16,7 +18,6 @@ import java.util.Scanner;
 public class Client implements NotificationHandler {
     private String url;
     private WebSocketFacade ws;
-    private DrawingBoard draw;
     private String playerColor;
     private ServerFacade serverFacade;
     private String username;
@@ -276,7 +277,7 @@ public class Client implements NotificationHandler {
             }
             try {
                 var gameNum = Integer.parseInt(words[0]);
-                if (gameNum < 0 || gameNum > gameList.size()) {
+                if (gameNum < 0 || gameNum > gameList.size()-1) {
                     System.out.println("Error: entered number is either less than 1 or higher than the amount of games listed. Try again");
                     continue;
                 }
@@ -324,7 +325,7 @@ public class Client implements NotificationHandler {
                 }
                 try {
                     var gameNum = Integer.parseInt(words[0]);
-                    if (gameNum < 0 || gameNum > gameList.size()) {
+                    if (gameNum < 0 || gameNum > gameList.size()-1) {
                         System.out.println("Error: entered number is either less than 0 or higher than the amount of games listed. Try again");
                         continue;
                     }
@@ -403,7 +404,7 @@ public class Client implements NotificationHandler {
                         resign(ws, authToken, game);
                         break;
                     case "highlight":
-                        highlight(ws);
+                        highlight(game, playerColor);
                         break;
                     default:
                         System.out.println("Invalid input! Please type 'help' to get started");
@@ -465,7 +466,11 @@ public class Client implements NotificationHandler {
         while (true) {
             System.out.println("Enter a promotion piece (if applicable) i.e. Q, K, R, B, for Queen, Knight, Rook, or Bishop respectively");
             promoPiece = scanner.nextLine();
-            if (promoPiece != null) {
+            if (promoPiece.isEmpty()) {
+                promoPiece = null;
+                break;
+            }
+            else {
                 if (promoPiece.length() == 1) {
                     if (promoPiece.equals("Q") || promoPiece.equals("K") || promoPiece.equals("R") || promoPiece.equals("B")) {
                         break;
@@ -480,8 +485,23 @@ public class Client implements NotificationHandler {
         ws.resign(gameData, authToken);
     }
 
-    private void highlight(WebSocketFacade ws) {
-
+    private void highlight(GameData game, String playerColor) {
+        Scanner scanner = new Scanner(System.in);
+        String[] rowAndCol;
+        while (true) {
+            System.out.println("What square do you want to highlight moves for?");
+            String square = scanner.nextLine();
+            if (square.length() == 2) {
+                rowAndCol = new String[] { String.valueOf(square.charAt(0)), String.valueOf(square.charAt(1)) };
+                break;
+            } else {
+                System.out.println("Error: Please enter a valid square (i.e., 12 for a2)");
+            }
+        }
+        ChessPosition position = new ChessPosition(Integer.parseInt(rowAndCol[1]), Integer.parseInt(rowAndCol[0]));
+        Collection<ChessMove> validMoves = game.game().validMoves(position);
+        DrawingBoard draw = new DrawingBoard(game.game().getBoard());
+        draw.highlight(validMoves, playerColor);
     }
 
     public void notify(Notification notification) {
@@ -494,6 +514,7 @@ public class Client implements NotificationHandler {
 
     public void loadGamify(LoadGame loadGame) {
         ChessGame game = loadGame.getGame();
+        DrawingBoard draw = new DrawingBoard(game.getBoard());
         if (playerColor.equals("WHITE")) {
             draw.printBoardFromWhite();
         }
@@ -502,10 +523,3 @@ public class Client implements NotificationHandler {
         }
     }
 }
-
-/*
-ISSUES
-- Chess board isn't printing pretty
-- what if observer views multiple games at once? (might actually already be covered)
-- makeNormalMove test fails when run in package, but passes when run by itself
- */

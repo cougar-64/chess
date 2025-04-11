@@ -1,13 +1,13 @@
 package ui;
 
-import chess.ChessBoard;
-import chess.ChessGame;
-import chess.ChessPiece;
-import chess.ChessPosition;
+import chess.*;
+
+import java.util.Collection;
 
 public class DrawingBoard {
     String lightColor = EscapeSequences.SET_BG_COLOR_LIGHT_GREY;
     String darkColor = EscapeSequences.SET_BG_COLOR_DARK_GREY;
+    String highlightColor = EscapeSequences.SET_BG_COLOR_GREEN;
     String borderColor = EscapeSequences.SET_BG_COLOR_BLACK;
     String reset = EscapeSequences.RESET_BG_COLOR;
     ChessBoard chessboard;
@@ -24,6 +24,7 @@ public class DrawingBoard {
         board[9] = new String[]{EscapeSequences.EMPTY, " a ", " b ", " c ", " d ", " e ", " f ", " g ", " h ", EscapeSequences.EMPTY};
         for (int i = 1; i <= 8; i++) {
             board[i][0] = " " + (9 - i) + " ";
+            board[i][9] = " " + (9 - i) + " ";
         }
     }
 
@@ -87,6 +88,9 @@ public class DrawingBoard {
 
     public void printBoardFromBlack() {
         updateBoard();
+        String[] reversed = new String[]{EscapeSequences.EMPTY, " h ", " g ", " f ", " e ", " d ", " c ", " b ", " a ", EscapeSequences.EMPTY};
+        board[0] = reversed;
+        board[9] = reversed;
         for (int i = 9; i >= 0; i--) {
             for (int j = 9; j >= 0; j--) {
                 checkBounds(i, j, false);
@@ -99,7 +103,7 @@ public class DrawingBoard {
         if (i == 0 || i == 9 || j == 0 || j == 9) {
             if (i == 0 || i == 9) {
                 System.out.print(borderColor + board[i][j]);
-            } else if (j == 0) {
+            } else {
                 if (isWhite) {
                     System.out.print(borderColor + board[i][j]);
                 } else {
@@ -110,6 +114,32 @@ public class DrawingBoard {
             boolean darkOrLight = (i + j) % 2 == 0;
             String piece = board[i][j];
             System.out.print((darkOrLight ? lightColor : darkColor) + piece + reset);
+        }
+    }
+
+    public void highlight(Collection<ChessMove> validMoves, String playerColor) {
+        updateBoard();
+
+
+        for (int i = 1; i < 9; i++) {
+            for (int j = 1; j < 9; j++) {
+                int finalI = i;
+                int finalJ = j;
+                boolean isValidMove = validMoves.stream().anyMatch(move ->
+                        move.getEndPosition().equals(new ChessPosition(finalI, finalJ)));
+
+                if (isValidMove) {
+                    highlightSquare(i, j, true);
+                } else {
+                    checkBounds(i, j, playerColor.equals("WHITE"));
+                }
+            }
+            System.out.println(reset);
+        }
+    }
+    private void highlightSquare(int i, int j, boolean isValidMove) {
+        if (isValidMove) {
+            System.out.print(highlightColor + board[i][j] + reset);
         }
     }
 }

@@ -96,32 +96,41 @@ public class WebSocketFacade extends Endpoint {
 
     public void makeMove(String startSquare, String endSquare, String promoPiece, GameData gameData, String authToken) {
         ChessPiece.PieceType promotionPiece;
-        switch (promoPiece) {
-            case "Q":
-                promotionPiece = ChessPiece.PieceType.QUEEN;
-                break;
-            case "R":
-                promotionPiece = ChessPiece.PieceType.ROOK;
-                break;
-            case "K":
-                promotionPiece = ChessPiece.PieceType.KNIGHT;
-                break;
-            case "B":
-                promotionPiece = ChessPiece.PieceType.BISHOP;
-                break;
-            default:
-                promotionPiece = null;
-                break;
+        if (promoPiece == null) {
+            promotionPiece = null;
+        }
+        else {
+            switch (promoPiece) {
+                case "Q":
+                    promotionPiece = ChessPiece.PieceType.QUEEN;
+                    break;
+                case "R":
+                    promotionPiece = ChessPiece.PieceType.ROOK;
+                    break;
+                case "K":
+                    promotionPiece = ChessPiece.PieceType.KNIGHT;
+                    break;
+                case "B":
+                    promotionPiece = ChessPiece.PieceType.BISHOP;
+                    break;
+                default:
+                    promotionPiece = null;
+                    break;
+            }
         }
         char[] start = startSquare.toCharArray();
         char[] end = endSquare.toCharArray();
+        int startRow = Integer.parseInt(String.valueOf(start[1]));
+        int startCol = Integer.parseInt(String.valueOf(start[0]));
+        int endRow = Integer.parseInt(String.valueOf(end[1]));
+        int endCol = Integer.parseInt(String.valueOf(end[0]));
         try {
-
-            MakeMove makeMove = new MakeMove(authToken, gameData.gameID(), new ChessMove(new ChessPosition(start[0], start[1]),
-                    new ChessPosition(end[0], end[1]), promotionPiece));
+            MakeMove makeMove = new MakeMove(authToken, gameData.gameID(), new ChessMove(new ChessPosition(startRow, startCol),
+                    new ChessPosition(endRow, endCol), promotionPiece));
             command = new UserGameCommand(UserGameCommand.CommandType.MAKE_MOVE, authToken, gameData.gameID());
             this.session.getBasicRemote().sendText(new Gson().toJson(makeMove));
         } catch (IOException e) {
+            System.err.println(e.getMessage());
             sendError(e.getMessage());
         }
 

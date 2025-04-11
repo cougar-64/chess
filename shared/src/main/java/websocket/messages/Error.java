@@ -13,8 +13,6 @@ public class Error extends ServerMessage {
 
     @Override
     public String toString() {
-        return "Error{" +
-                "errorMessage='" + errorMessage + '\'' +
-                '}';
+        return errorMessage;
     }
 }
