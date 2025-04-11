@@ -160,10 +160,4 @@ public class DrawingBoard {
             System.out.println(reset);
         }
     }
-
-    private void highlightSquare(int i, int j, boolean isValidMove) {
-        if (isValidMove) {
-            System.out.print(highlightColor + board[i][j] + reset);
-        }
-    }
 }
