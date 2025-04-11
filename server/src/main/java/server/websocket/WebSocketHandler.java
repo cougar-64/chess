@@ -55,11 +55,6 @@ public class WebSocketHandler {
         }
     }
 
-//    @OnWebSocketClose
-//    public void onClose(Session session, int statusCode, String reason) {
-//        System.out.printf("WebSocket closed: code = %d, reason = %s\n", statusCode, reason);
-//    }
-
     private String getUsername(String authToken) throws IOException {
         try {
             return dataaccess.getAuthData(authToken).username();

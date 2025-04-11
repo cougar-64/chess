@@ -24,17 +24,15 @@ public class DrawingBoard {
         board[9] = new String[10];
         board[0][0] = board[0][9] = board[9][0] = board[9][9] = EscapeSequences.EMPTY;
 
-        // File labels (top and bottom)
         for (int i = 0; i < 8; i++) {
-            board[0][i + 1] = isWhite ? files[i] : files[7 - i]; // top
-            board[9][i + 1] = isWhite ? files[i] : files[7 - i]; // bottom
+            board[0][i + 1] = isWhite ? files[i] : files[7 - i];
+            board[9][i + 1] = isWhite ? files[i] : files[7 - i];
         }
 
-        // Rank labels (left and right)
         for (int i = 1; i <= 8; i++) {
             String rank = " " + (isWhite ? 9 - i : i) + " ";
-            board[i][0] = rank;         // left
-            board[i][9] = rank;         // right
+            board[i][0] = rank;
+            board[i][9] = rank;
         }
     }
 
@@ -114,7 +112,6 @@ public class DrawingBoard {
     private void checkBounds(int i, int j, boolean isWhite) {
         if (i == 0 || i == 9 || j == 0 || j == 9) {
             if (i == 0 || i == 9) {
-                // Flip file labels if viewing from black's perspective
                 System.out.print(borderColor + board[i][isWhite ? j : 9 - j]);
             } else {
                 if (isWhite) {
@@ -135,7 +132,6 @@ public class DrawingBoard {
         initializeBoard(isWhite);
         updateBoard(isWhite);
 
-        // Get the start position (assumes all moves are from the same start)
         ChessPosition startPos = validMoves.iterator().next().getStartPosition();
 
         for (int i = 0; i < 10; i++) {

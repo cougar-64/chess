@@ -2,7 +2,6 @@ package ui;
 import chess.ChessGame;
 import chess.ChessMove;
 import chess.ChessPosition;
-import chess.InvalidMoveException;
 import com.google.gson.Gson;
 import server.ServerFacade;
 import exception.ResponseException;
@@ -28,7 +27,6 @@ public class Client implements NotificationHandler {
         this.serverFacade = new ServerFacade(url);
     }
     boolean isLoggedIn = false;
-
     public void preLoginMenu() {
         Scanner scanner = new Scanner(System.in);
         System.out.println("Welcome to CS 240 chess! ♛ ♚ ♞ \n Type 'help' to get started");
@@ -55,7 +53,6 @@ public class Client implements NotificationHandler {
             }
         }
     }
-
     private void preHelp() {
         System.out.println("""
                 Please type one of the following!
@@ -64,7 +61,6 @@ public class Client implements NotificationHandler {
                 quit -- to quit playing chess and exit the program
                 help -- lists possible commands""");
     }
-
     public void quit() {
         Scanner scanner = new Scanner(System.in);
         while (true) {
@@ -78,7 +74,6 @@ public class Client implements NotificationHandler {
             }
         }
     }
-
     private void preLogin() {
         Scanner scanner = new Scanner(System.in);
         String[] words;
@@ -106,7 +101,6 @@ public class Client implements NotificationHandler {
         }
         postLoginMenu(username);
     }
-
     private void preRegister() {
         Scanner scanner = new Scanner(System.in);
         while (true) {
@@ -138,7 +132,6 @@ public class Client implements NotificationHandler {
             }
         }
     }
-
     public void postLoginMenu(String username) {
         Scanner scanner = new Scanner(System.in);
         if (isLoggedIn) {
@@ -176,7 +169,6 @@ public class Client implements NotificationHandler {
             }
         }
     }
-
     private void postHelp() {
         System.out.print("""
                 create - create a new game
@@ -188,7 +180,6 @@ public class Client implements NotificationHandler {
                 help - lists possible commands
                 """);
     }
-
     private GameData create() {
         Scanner scanner = new Scanner(System.in);
         String[] words;
@@ -211,14 +202,13 @@ public class Client implements NotificationHandler {
             serverFacade.create(authToken, words[0]);
             System.out.println("successfully created");
             list();
-            // this function is now finished, it will return to the post-login menu
+
             postLoginMenu(username);
         } catch (ResponseException e) {
             System.err.println(e.getMessage());
         }
         return null;
     }
-
     private void list() {
         gameList.clear();
         try {
@@ -234,13 +224,11 @@ public class Client implements NotificationHandler {
                 System.out.println("Game " + entry.getKey() + ": " + "Game Name: " + game.gameName() + " WHITE: " +
                         game.whiteUsername() + ", BLACK:" + game.blackUsername());
             }
-            // this function is done so it now returns to post-login menu
             postLoginMenu(username);
         } catch (ResponseException e) {
             System.err.println(e.getMessage());
         }
     }
-
     private void initGameList() {
         try {
             ListGamesResult listOfGames = serverFacade.listGames(authToken);
@@ -251,7 +239,6 @@ public class Client implements NotificationHandler {
             System.err.println(e.getMessage());
         }
     }
-
     private void join(String username) {
         initGameList();
         if (gameList.isEmpty()) {
@@ -295,7 +282,6 @@ public class Client implements NotificationHandler {
                 GameData game = serverFacade.join(authToken, words[0], words[1], gameList);
                 ws = new WebSocketFacade(url, this);
                 ws.connect(game, authToken);
-                // this function is done so it now goes to the joined Menu
                 joinedGameMenu(username, words[1], ws, game);
             } catch (ResponseException e) {
                 System.err.println(e.getMessage());
@@ -303,7 +289,6 @@ public class Client implements NotificationHandler {
             }
         }
     }
-
     private void observe() {
         initGameList();
         String gameNumber;
@@ -358,7 +343,6 @@ public class Client implements NotificationHandler {
             System.err.println(e.getMessage());
         }
     }
-
     private void logout() {
         try {
             serverFacade.logout(authToken);
@@ -369,7 +353,6 @@ public class Client implements NotificationHandler {
             System.err.println(e.getMessage());
         }
     }
-
     private void clear() {
         // clears the database - meant only for testing purposes
         // is not listed in "help"
@@ -380,7 +363,6 @@ public class Client implements NotificationHandler {
             System.err.println(r.getMessage());
         }
     }
-
     public void joinedGameMenu(String username, String playerColor, WebSocketFacade ws, GameData game) {
         if (isLoggedIn) {
             Scanner scanner = new Scanner(System.in);
@@ -412,7 +394,6 @@ public class Client implements NotificationHandler {
             }
         }
     }
-
     private void joinedHelp() {
         System.out.println("""
                 Please type one of the following:
@@ -423,12 +404,10 @@ public class Client implements NotificationHandler {
                 resign - resign from your current game
                 highlight - highlights all legal moves""");
     }
-
     private void redraw(WebSocketFacade ws, String playerColor, GameData game) {
         String json = new Gson().toJson(new LoadGame(game.game()));
         ws.loadGame(json);
     }
-
     private void leave (WebSocketFacade ws, GameData game) {
         try {
             ws.leave(game, authToken);
@@ -437,7 +416,6 @@ public class Client implements NotificationHandler {
             System.err.println(e.getMessage());
         }
     }
-
     private void makeMove(WebSocketFacade ws, String username, String playerColor, GameData game) {
         String startSquare;
         String endSquare;
@@ -480,11 +458,9 @@ public class Client implements NotificationHandler {
         }
         ws.makeMove(startSquare, endSquare, promoPiece, game, authToken);
     }
-
     private void resign(WebSocketFacade ws, String authToken, GameData gameData) {
         ws.resign(gameData, authToken);
     }
-
     private void highlight(GameData game, String playerColor) {
         Scanner scanner = new Scanner(System.in);
         String[] rowAndCol;
@@ -503,15 +479,12 @@ public class Client implements NotificationHandler {
         DrawingBoard draw = new DrawingBoard(game.game().getBoard());
         draw.highlight(validMoves, playerColor);
     }
-
     public void notify(Notification notification) {
         System.out.println(notification.getMessage());
     }
-
     public void errorify(websocket.messages.Error error) {
         System.out.println(error.getMessage());
     }
-
     public void loadGamify(LoadGame loadGame) {
         ChessGame game = loadGame.getGame();
         DrawingBoard draw = new DrawingBoard(game.getBoard());

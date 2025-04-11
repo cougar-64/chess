@@ -9,7 +9,8 @@ import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ConnectionManager {
-    public final ConcurrentHashMap<Integer, ConcurrentHashMap<String, Session>> sessionMap = new ConcurrentHashMap<>(); // integer = gameID, String = authToken, Session = session
+    public final ConcurrentHashMap<Integer, ConcurrentHashMap<String, Session>> sessionMap = new ConcurrentHashMap<>();
+    // integer = gameID, String = authToken, Session = session
 
     public void addPlayer(int gameID, String authToken, Session session) {
         sessionMap.computeIfAbsent(gameID, k -> new ConcurrentHashMap<>());
