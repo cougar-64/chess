@@ -116,43 +116,42 @@ public class DrawingBoard {
         boolean isWhite = playerColor.equals("WHITE");
         initializeBoard(isWhite);
         updateBoard(isWhite);
-        if (validMoves == null) {
+        if (validMoves.isEmpty()) {
             if (playerColor.equals("WHITE")) {
                 printBoardFromWhite();
                 return;
-            }
-            else {
+            } else {
                 printBoardFromBlack();
                 return;
             }
-        }
+        } else {
+            ChessPosition startPos = validMoves.iterator().next().getStartPosition();
 
-        ChessPosition startPos = validMoves.iterator().next().getStartPosition();
-
-        for (int i = 0; i < 10; i++) {
-            for (int j = 0; j < 10; j++) {
-                if (i == 0 || i == 9 || j == 0 || j == 9) {
-                    checkBounds(i, j, isWhite);
-                } else {
-                    int boardRow = isWhite ? 8 - (i - 1) : i;
-                    int boardCol = isWhite ? j : 9 - j;
-                    ChessPosition currentPos = new ChessPosition(boardRow, boardCol);
-
-                    String piece = board[i][j];
-
-                    boolean isStart = currentPos.equals(startPos);
-                    boolean isValidMove = validMoves.stream()
-                            .anyMatch(move -> move.getEndPosition().equals(currentPos));
-
-                    if (isStart || isValidMove) {
-                        System.out.print(highlightColor + piece + reset);
+            for (int i = 0; i < 10; i++) {
+                for (int j = 0; j < 10; j++) {
+                    if (i == 0 || i == 9 || j == 0 || j == 9) {
+                        checkBounds(i, j, isWhite);
                     } else {
-                        boolean darkOrLight = (i + j) % 2 == 0;
-                        System.out.print((darkOrLight ? lightColor : darkColor) + piece + reset);
+                        int boardRow = isWhite ? 8 - (i - 1) : i;
+                        int boardCol = isWhite ? j : 9 - j;
+                        ChessPosition currentPos = new ChessPosition(boardRow, boardCol);
+
+                        String piece = board[i][j];
+
+                        boolean isStart = currentPos.equals(startPos);
+                        boolean isValidMove = validMoves.stream()
+                                .anyMatch(move -> move.getEndPosition().equals(currentPos));
+
+                        if (isStart || isValidMove) {
+                            System.out.print(highlightColor + piece + reset);
+                        } else {
+                            boolean darkOrLight = (i + j) % 2 == 0;
+                            System.out.print((darkOrLight ? lightColor : darkColor) + piece + reset);
+                        }
                     }
                 }
+                System.out.println(reset);
             }
-            System.out.println(reset);
         }
     }
 }

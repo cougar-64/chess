@@ -523,6 +523,4 @@ public class Client implements NotificationHandler {
 /*
 to do:
 - don't print out json
-- redraw is not drawing the current board
-- error trying to highlight d8??
  */
