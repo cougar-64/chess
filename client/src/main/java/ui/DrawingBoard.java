@@ -132,9 +132,9 @@ public class DrawingBoard {
                     if (i == 0 || i == 9 || j == 0 || j == 9) {
                         checkBounds(i, j, isWhite);
                     } else {
-                        int boardRow = isWhite ? 8 - (i - 1) : i;
-                        int boardCol = isWhite ? j : 9 - j;
-                        ChessPosition currentPos = new ChessPosition(boardRow, boardCol);
+                        int boardRow = isWhite ? 8 - (i - 1) : i - 1;
+                        int boardCol = isWhite ? j - 1 : 8 - (j - 1);
+                        ChessPosition currentPos = new ChessPosition(boardRow+1, boardCol+1);
 
                         String piece = board[i][j];
 

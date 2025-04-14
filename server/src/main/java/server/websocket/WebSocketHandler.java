@@ -171,7 +171,7 @@ public class WebSocketHandler {
 
     public void resign(Session session, String username, Resign command) throws IOException {
         if (dataaccess.getGame(gameID).game().isItOver()) {
-            websocket.messages.Error error = new websocket.messages.Error("The game is over! Go home (type 'leave')");
+            websocket.messages.Error error = new websocket.messages.Error("The game is over! You can't resign! Go home (type 'leave')");
             connectionManager.toClient(command.getAuthToken(), error);
             return;
         }
@@ -184,7 +184,7 @@ public class WebSocketHandler {
         game.game().setOver();
         dataaccess.updateGameData(getPlayerColor(), game, username);
         connectionManager.removePlayer(gameID, command.getAuthToken());
-        var message = String.format("&s resigned", username);
+        var message = String.format("%s resigned", username);
         Notification notification = new Notification(message);
         connectionManager.notifyToAll(gameID, notification);
         session.close();

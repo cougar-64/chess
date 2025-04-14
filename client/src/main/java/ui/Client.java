@@ -406,7 +406,7 @@ public class Client implements NotificationHandler {
                         makeMove(ws, username, playerColor, game);
                         break;
                     case "resign":
-                        resign(ws, authToken, game);
+                        resign(ws, authToken, game, username, playerColor);
                         break;
                     case "highlight":
                         highlight(playerColor);
@@ -484,10 +484,22 @@ public class Client implements NotificationHandler {
             System.out.println(e.getMessage());
         }
     }
-    private void resign(WebSocketFacade ws, String authToken, GameData gameData) {
+    private void resign(WebSocketFacade ws, String authToken, GameData gameData, String username, String playerColor) {
         try {
-            ws.resign(gameData, authToken);
-            postLoginMenu(username);
+            Scanner scanner = new Scanner(System.in);
+            System.out.println("Are you sure you want to resign? y/n");
+            String input = scanner.nextLine();
+            if (input.equals("y")) {
+                try {
+                    ws.resign(gameData, authToken);
+                    postLoginMenu(username);
+                } catch (Exception e) {
+                    System.out.println(e.getMessage());
+                }
+            }
+            else if (input.equals("n")) {
+                joinedGameMenu(username, playerColor, ws, gameData);
+            }
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
@@ -533,11 +545,11 @@ public class Client implements NotificationHandler {
 
 /*
 to do:
-- observer needs a help menu
+- observer needs a help menu DONE
 - when checkmate is hit, print it out immediately (username rather than color)
 - white cannot resign after checkmate....
 - needs to say white is in check (username rather than color)
 - highlight is highlighting the wrong side of the board??? (when it highlights, it flips the piece color and then keeps it)
-- need to ask for confirmation to resign
-- after resignation, it needs to say the game is over instead of it's not your turn
+- need to ask for confirmation to resign DONE
+- after resignation, it needs to say the game is over instead of it's not your turn DONE
  */

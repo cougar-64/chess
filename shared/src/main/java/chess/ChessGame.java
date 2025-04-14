@@ -65,6 +65,10 @@ public class ChessGame implements Serializable {
         ChessGame gameCopy = new ChessGame();
         Collection<ChessMove> moves = myMoves(startPosition);
         for (ChessMove move : moves) {
+            ChessPiece endPiece = currentBoard.getPiece(move.getEndPosition());
+            if (endPiece != null && endPiece.getTeamColor() != teamColor) {
+                continue;
+            }
             gameCopy.setBoard(currentBoard.createClone());
             try {
                 gameCopy.makeMoveNoCheckValid(move);
