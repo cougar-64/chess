@@ -546,11 +546,5 @@ public class Client implements NotificationHandler {
 
 /*
 to do:
-- observer needs a help menu DONE
-- when checkmate is hit, print it out immediately (username rather than color)
-- white cannot resign after checkmate....
-- needs to say white is in check (username rather than color)
-- highlight is highlighting the wrong side of the board??? (when it highlights, it flips the piece color and then keeps it)
-- need to ask for confirmation to resign DONE
-- after resignation, it needs to say the game is over instead of it's not your turn DONE
+-
  */
