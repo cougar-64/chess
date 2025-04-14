@@ -76,12 +76,12 @@ public class WebSocketFacade extends Endpoint {
     }
 
     public void sendNotification(String message) {
-        Notification notification = new Notification(message);
+        Notification notification = new Gson().fromJson(message, Notification.class);
         notificationHandler.notify(notification);
     }
 
     public void sendError(String message) {
-        websocket.messages.Error error = new websocket.messages.Error(message);
+        websocket.messages.Error error = new Gson().fromJson(message, websocket.messages.Error.class);
         notificationHandler.errorify(error);
     }
 

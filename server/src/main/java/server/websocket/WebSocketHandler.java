@@ -110,11 +110,14 @@ public class WebSocketHandler {
         int endRow = endSquare.getRow();
         int endCol = endSquare.getColumn();
         ChessGame.TeamColor teamColor;
+        ChessGame.TeamColor oppositeColor;
         if (getPlayerColor() == "WHITE") {
             teamColor = ChessGame.TeamColor.WHITE;
+            oppositeColor = ChessGame.TeamColor.BLACK;
         }
         else {
             teamColor = ChessGame.TeamColor.BLACK;
+            oppositeColor = ChessGame.TeamColor.WHITE;
         }
         if (!game.game().getTeamTurn().equals(teamColor)) {
             websocket.messages.Error error = new websocket.messages.Error("It's not your turnnnnn");
@@ -133,6 +136,14 @@ public class WebSocketHandler {
             connectionManager.loadGameForAll(gameID, loadGameMessage);
             Notification notification = new Notification(username + " made the move [" + col + "," + row + "] to [" + endCol + "," + endRow + "]");
             connectionManager.broadcast(gameID, command.getAuthToken(), notification);
+            if (game.game().isInCheckmate(oppositeColor)) {
+                Notification checkmate = new Notification("Checkmate!");
+                connectionManager.broadcast(gameID, command.getAuthToken(), checkmate);
+            }
+            else if (game.game().isInCheck(oppositeColor)) {
+                Notification check = new Notification(username + " is in check");
+                connectionManager.broadcast(gameID, command.getAuthToken(), check);
+            }
         } catch (InvalidMoveException e) {
             websocket.messages.Error error = new websocket.messages.Error(e.getMessage());
             connectionManager.toClient(command.getAuthToken(), error);

@@ -347,6 +347,9 @@ public class Client implements NotificationHandler {
                 else if (input.equals("highlight")) {
                     highlight(playerColor);
                 }
+                else if (input.equals("help")) {
+                    observeHelp();
+                }
                 else {
                     System.out.println("Error: could not interpret input");
                 }
@@ -374,6 +377,14 @@ public class Client implements NotificationHandler {
         } catch (ResponseException r) {
             System.err.println(r.getMessage());
         }
+    }
+
+    public void observeHelp() {
+        System.out.println("""
+                redraw - redraws the board
+                leave - leave the game
+                highlight - highlight a position on the board
+                help - shows this menu again""");
     }
     public void joinedGameMenu(String username, String playerColor, WebSocketFacade ws, GameData game) {
         if (isLoggedIn) {
@@ -522,5 +533,11 @@ public class Client implements NotificationHandler {
 
 /*
 to do:
-- don't print out json
+- observer needs a help menu
+- when checkmate is hit, print it out immediately (username rather than color)
+- white cannot resign after checkmate....
+- needs to say white is in check (username rather than color)
+- highlight is highlighting the wrong side of the board??? (when it highlights, it flips the piece color and then keeps it)
+- need to ask for confirmation to resign
+- after resignation, it needs to say the game is over instead of it's not your turn
  */

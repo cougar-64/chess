@@ -32,6 +32,7 @@ public class ConnectionManager {
                 Session session = playerSessionEntry.getValue();
                 if (session.isOpen() && !authToken.equals(excludePlayer)) {
                     session.getRemote().sendString(new Gson().toJson(notification));
+                    // takes it from the normal notification to the serialized version that I can't change
                 }
             }
         }
