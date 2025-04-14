@@ -12,10 +12,7 @@ import ui.websocket.WebSocketFacade;
 import websocket.messages.*;
 
 import java.io.IOException;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Scanner;
+import java.util.*;
 
 public class Client implements NotificationHandler {
     private ChessGame game;
@@ -521,7 +518,11 @@ public class Client implements NotificationHandler {
         ChessPosition position = new ChessPosition(Integer.parseInt(rowAndCol[1]), Integer.parseInt(rowAndCol[0]));
         Collection<ChessMove> validMoves = game.validMoves(position);
         DrawingBoard draw = new DrawingBoard(game.getBoard());
-        draw.highlight(validMoves, playerColor);
+        if (playerColor.equals("BLACK"))
+            draw.printBoardFromBlack(validMoves);
+        else {
+            draw.printBoardFromWhite(validMoves);
+        }
     }
     public void notify(Notification notification) {
         String message = notification.getMessage();
@@ -534,10 +535,10 @@ public class Client implements NotificationHandler {
         ChessGame game = loadGame.getGame();
         DrawingBoard draw = new DrawingBoard(game.getBoard());
         if (playerColor.equals("WHITE")) {
-            draw.printBoardFromWhite();
+            draw.printBoardFromWhite(new ArrayList<ChessMove>());
         }
         else {
-            draw.printBoardFromBlack();
+            draw.printBoardFromBlack(new ArrayList<ChessMove>());
         }
         this.game = game;
     }

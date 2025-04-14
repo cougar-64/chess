@@ -1,7 +1,9 @@
 package ui;
 
 import chess.*;
+import websocket.commands.Connect;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 public class DrawingBoard {
@@ -72,29 +74,37 @@ public class DrawingBoard {
         }
     }
 
-    public void printBoardFromWhite() {
+    public void printBoardFromWhite(Collection<ChessMove> validMoves) {
         initializeBoard(true);
         updateBoard(true);
+        ArrayList<ChessPosition> endPositions = new ArrayList<>();
+        for (ChessMove move : validMoves) {
+            endPositions.add(move.getEndPosition());
+        }
         for (int i = 0; i < 10; i++) {
             for (int j = 0; j < 10; j++) {
-                checkBounds(i, j, true);
+                checkBounds(i, j, true, endPositions);
             }
             System.out.println(reset);
         }
     }
 
-    public void printBoardFromBlack() {
+    public void printBoardFromBlack(Collection<ChessMove> validMoves) {
         initializeBoard(false);
         updateBoard(false);
+        ArrayList<ChessPosition> endPositions = new ArrayList<>();
+        for (ChessMove move : validMoves) {
+            endPositions.add(move.getEndPosition());
+        }
         for (int i = 9; i >= 0; i--) {
             for (int j = 9; j >= 0; j--) {
-                checkBounds(i, j, false);
+                checkBounds(i, j, false, endPositions);
             }
             System.out.println(reset);
         }
     }
 
-    private void checkBounds(int i, int j, boolean isWhite) {
+    private void checkBounds(int i, int j, boolean isWhite, ArrayList<ChessPosition> validMoves) {
         if (i == 0 || i == 9 || j == 0 || j == 9) {
             if (i == 0 || i == 9) {
                 System.out.print(borderColor + board[i][isWhite ? j : 9 - j]);
@@ -106,52 +116,13 @@ public class DrawingBoard {
                 }
             }
         } else {
-            boolean darkOrLight = (i + j) % 2 == 0;
             String piece = board[i][j];
+            if (validMoves.contains(new ChessPosition(9-i,j))) {
+                System.out.print((highlightColor) + piece + reset);
+                return;
+            }
+            boolean darkOrLight = (i + j) % 2 == 0;
             System.out.print((darkOrLight ? lightColor : darkColor) + piece + reset);
-        }
-    }
-
-    public void highlight(Collection<ChessMove> validMoves, String playerColor) {
-        boolean isWhite = playerColor.equals("WHITE");
-        initializeBoard(isWhite);
-        updateBoard(isWhite);
-        if (validMoves.isEmpty()) {
-            if (playerColor.equals("WHITE")) {
-                printBoardFromWhite();
-                return;
-            } else {
-                printBoardFromBlack();
-                return;
-            }
-        } else {
-            ChessPosition startPos = validMoves.iterator().next().getStartPosition();
-
-            for (int i = 0; i < 10; i++) {
-                for (int j = 0; j < 10; j++) {
-                    if (i == 0 || i == 9 || j == 0 || j == 9) {
-                        checkBounds(i, j, isWhite);
-                    } else {
-                        int boardRow = isWhite ? 8 - (i - 1) : i - 1;
-                        int boardCol = isWhite ? j - 1 : 8 - (j - 1);
-                        ChessPosition currentPos = new ChessPosition(boardRow+1, boardCol+1);
-
-                        String piece = board[i][j];
-
-                        boolean isStart = currentPos.equals(startPos);
-                        boolean isValidMove = validMoves.stream()
-                                .anyMatch(move -> move.getEndPosition().equals(currentPos));
-
-                        if (isStart || isValidMove) {
-                            System.out.print(highlightColor + piece + reset);
-                        } else {
-                            boolean darkOrLight = (i + j) % 2 == 0;
-                            System.out.print((darkOrLight ? lightColor : darkColor) + piece + reset);
-                        }
-                    }
-                }
-                System.out.println(reset);
-            }
         }
     }
 }
